@@ -10,11 +10,15 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-    });
+    if (typeof window !== "undefined" && navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      });
+    } else {
+      console.error("getUserMedia를 지원하지 않는 환경입니다.");
+    }
   }, []);
 
   const capturePhoto = () => {
