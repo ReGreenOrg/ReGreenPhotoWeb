@@ -32,32 +32,44 @@ export default function CheckPage() {
   };
 
   return (
-    <div className="p-4 text-center">
-      <h2 className="text-xl font-semibold mb-4">4장의 사진을 선택하세요</h2>
-      <div className="grid grid-cols-4 gap-2 mb-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-pink-100 to-blue-100 font-['Cafe24SsurroundAir','sans-serif']">
+      <h2 className="text-3xl font-extrabold mb-6 text-pink-600 drop-shadow-lg tracking-wider">
+        4장의 사진을 선택하세요
+      </h2>
+      <div className="grid grid-cols-4 gap-4 mb-8">
         {allImages.map((img, idx) => (
           <Image
             key={idx}
             src={img}
-            width={320}
-            height={240}
+            width={160}
+            height={120}
             alt={`shot-${idx}`}
             onClick={() => toggleSelect(img)}
-            className={`cursor-pointer border-4 rounded ${
-              selectedImages.includes(img) ? "border-blue-500" : "border-transparent"
+            className={`cursor-pointer border-4 rounded-xl shadow-lg transition-transform duration-200 hover:scale-105 ${
+              selectedImages.includes(img)
+                ? "border-pink-400 bg-pink-100"
+                : "border-gray-200 bg-white"
             }`}
+            style={{ transform: "scaleX(-1)" }}
           />
         ))}
       </div>
-      <div className="mb-4">
-        <label className="mr-2">프레임 색상:</label>
-        <select value={frameStyle} onChange={(e) => setFrameStyle(e.target.value)}>
+      <div className="mb-6 flex items-center justify-center gap-4">
+        <label className="mr-2 text-lg font-semibold text-blue-500">프레임 색상:</label>
+        <select
+          value={frameStyle}
+          onChange={(e) => setFrameStyle(e.target.value)}
+          className="px-3 py-2 rounded-lg border-2 border-blue-200 bg-white text-blue-600 focus:outline-none focus:ring-2 focus:ring-pink-200"
+        >
           <option value="white">흰색</option>
           <option value="black">검정</option>
           <option value="skyblue">하늘색</option>
         </select>
       </div>
-      <button onClick={handleNext} className="px-6 py-2 bg-green-600 text-white rounded">
+      <button
+        onClick={handleNext}
+        className="px-10 py-3 bg-gradient-to-r from-pink-400 to-blue-400 text-white text-lg font-bold rounded-full shadow-lg hover:scale-105 transition"
+      >
         다음
       </button>
     </div>

@@ -44,14 +44,32 @@ export default function HomePage() {
   }, [progress]);
 
   return (
-    <div className="text-center py-8">
-      <h1 className="text-2xl font-bold mb-4">촬영 중: {progress}/8</h1>
-      <video ref={videoRef} autoPlay width={800} height={800} className="mx-auto border" />
-      {progress < 8 && (
-        <button className="mt-4 px-6 py-2 bg-blue-600 text-white rounded" onClick={capturePhoto}>
-          촬영 시작
-        </button>
-      )}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-pink-100 to-blue-100 font-['Cafe24SsurroundAir','sans-serif']">
+      <h1 className="text-4xl font-extrabold mb-6 text-pink-600 ">촬영 중: {progress}/8</h1>
+      <div className="bg-white rounded-3xl shadow-2xl p-8 border-4 border-pink-200 flex flex-col items-center">
+        <video
+          ref={videoRef}
+          autoPlay
+          width={500}
+          height={480}
+          className="mx-auto mb-6 rounded-2xl border-4 border-blue-200 shadow-lg"
+          style={{ transform: "scaleX(-1)" }}
+        />
+        {progress < 8 && (
+          <button
+            className="mt-2 px-8 py-3 bg-gradient-to-r from-pink-400 to-blue-400 text-white text-lg font-bold rounded-full shadow-lg hover:scale-105 transition"
+            onClick={capturePhoto}
+          >
+            {progress === 0 ? "촬영 시작" : "다음 컷 촬영"}
+          </button>
+        )}
+      </div>
+      <style jsx global>{`
+        @import url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2104@1.0/Cafe24SsurroundAir.woff2");
+        body {
+          font-family: "Cafe24SsurroundAir", sans-serif;
+        }
+      `}</style>
     </div>
   );
 }

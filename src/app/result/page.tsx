@@ -4,12 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { generateReactHelpers } from "@uploadthing/react";
 import type { OurFileRouter } from "../api/uploadthing/core";
-import html2canvas from "html2canvas";
+// ✅ html2canvas → html-to-image로 교체
+import { toBlob } from "html-to-image";
+import { motion } from "framer-motion";
 
 const FRAME_COLORS: Record<string, string> = {
-  white: "#ffffff",
-  black: "#000000",
-  skyblue: "#87ceeb",
+  white: "bg-[#ffffff]",
+  black: "bg-[#000000]",
+  skyblue: "bg-[#87ceeb]",
 };
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
@@ -34,57 +36,96 @@ export default function ResultPage() {
     if (!resultRef.current || selectedImages.length !== 4) return;
 
     const timer = setTimeout(async () => {
-      const canvas = await html2canvas(resultRef.current!, { useCORS: true, scale: 2 });
-      const blob = await new Promise<Blob>((resolve) =>
-        canvas.toBlob((b) => resolve(b as Blob), "image/png")
-      );
+      const node = resultRef.current!;
+      try {
+        // ✅ html-to-image를 사용한 캡처
+        const blob = await toBlob(node, {
+          cacheBust: true,
+          style: {
+            transform: "scale(1)", // 필요시 이미지 뒤틀림 방지
+          },
+        });
 
-      const file = new File([blob], "final.png", { type: "image/png" });
-      const res = await startUpload([file]);
+        if (!blob) throw new Error("이미지 캡처 실패");
 
-      const uploaded = res?.[0];
-      if (uploaded?.url) {
-        setFinalUrl(uploaded.url);
+        const file = new File([blob], "final.png", { type: "image/png" });
+        const res = await startUpload([file]);
+
+        const uploaded = res?.[0];
+        if (uploaded?.url) {
+          setFinalUrl(uploaded.url);
+        }
+      } catch (err) {
+        console.error("이미지 업로드 실패:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }, 100);
 
     return () => clearTimeout(timer);
   }, [selectedImages]);
 
   return (
-    <div className="p-4 text-center">
-      <h2 className="text-xl font-semibold mb-4">최종 결과</h2>
-
-      <div
+    <div className="h-full flex flex-col items-center justify-center bg-gradient-to-b from-pink-100 to-blue-100 font-['Cafe24SsurroundAir','sans-serif'] p-2">
+      <div className="flex justify-center items-center gap-32">
+        <motion.h2
+          className="text-3xl  mt-4 font-extrabold mb-6 text-pink-400 "
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          우이미 네컷
+        </motion.h2>
+        <motion.a
+          href="/"
+          className="text-lg font-semibold text-pink-400 underline transition-colors"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+        >
+          홈으로
+        </motion.a>
+      </div>
+      {finalUrl && (
+        <motion.div
+          className=" left-3 top-3 flex justify-center gap-10 items-center z-10 mb-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.7, ease: "easeOut" }}
+        >
+          <QRCodeSVG value={finalUrl} size={64} />
+          <span className="mt-1 text-md font-bold">큐알로 인식해 이미지를 다운하세요!</span>
+        </motion.div>
+      )}
+      <motion.div
         ref={resultRef}
-        className="mx-auto flex flex-col gap-5 p-5 rounded-md"
-        style={{
-          backgroundColor: FRAME_COLORS[frameStyle],
-          width: "320px",
-          height: "auto",
-        }}
+        className={`relative mx-auto flex flex-col gap-4 sm:gap-5 p-3 sm:p-6 rounded-3xl shadow-2xl ${FRAME_COLORS[frameStyle]}`}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
       >
         {selectedImages.map((src, idx) => (
-          <img
+          <motion.img
             key={idx}
             src={src}
             alt={`선택 이미지 ${idx + 1}`}
-            className="w-full h-auto rounded"
+            className="w-full h-auto rounded-xl"
+            style={{ transform: "scaleX(-1)" }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.4 + idx * 0.15, ease: "easeOut" }}
           />
         ))}
-        <p className="text-center text-xs text-black mt-2">
+        <motion.p
+          className="text-center text-base font-semibold text-pink-500 mt-2 tracking-wide drop-shadow-sm"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.7, ease: "easeOut" }}
+        >
           우이미와 함께 <br /> 환경 지켜요
-        </p>
-      </div>
-
+        </motion.p>
+      </motion.div>
       {loading && <p className="mt-4">이미지를 캡처하고 업로드 중입니다...</p>}
-      {finalUrl && (
-        <div className="mt-4 w-full  flex flex-col items-center gap-4 justify-center">
-          <p className="mb-2">QR로 결과 공유</p>
-          <QRCodeSVG value={finalUrl} size={128} />
-        </div>
-      )}
     </div>
   );
 }
