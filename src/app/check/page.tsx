@@ -42,8 +42,8 @@ export default function CheckPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-pink-100 to-blue-100 font-['Cafe24SsurroundAir','sans-serif']">
-      <h2 className="text-3xl font-extrabold mb-6 text-pink-600 drop-shadow-lg tracking-wider">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white ">
+      <h2 className="text-3xl font-extrabold mb-6 text-pink-600  tracking-wider">
         4장의 사진을 선택하세요
       </h2>
       <div className="grid grid-cols-4 gap-4 mb-8">

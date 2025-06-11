@@ -65,7 +65,7 @@ export default function ResultPage({ type }: { type: string }) {
   }, [selectedImages]);
 
   return (
-    <div className="h-full flex flex-col items-center justify-center bg-gradient-to-b from-pink-100 to-blue-100 font-['Cafe24SsurroundAir','sans-serif'] p-2">
+    <div className="h-full flex flex-col items-center justify-center bg-gradient-to-b from-pink-100 to-blue-100  p-2">
       <div className="flex justify-center items-center gap-32">
         <motion.h2
           className="text-3xl  mt-4 font-extrabold mb-6 text-pink-400 "
