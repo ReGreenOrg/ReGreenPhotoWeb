@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { generateReactHelpers } from "@uploadthing/react";
-import type { OurFileRouter } from "../api/uploadthing/core";
-// ✅ html2canvas → html-to-image로 교체
+import type { OurFileRouter } from "@/app/api/uploadthing/core";
 import { toBlob } from "html-to-image";
 import { motion } from "framer-motion";
 
@@ -16,7 +15,7 @@ const FRAME_COLORS: Record<string, string> = {
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
-export default function ResultPage() {
+export default function ResultPage({ type }: { type: string }) {
   const resultRef = useRef<HTMLDivElement>(null);
   const [finalUrl, setFinalUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -122,7 +121,23 @@ export default function ResultPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.7, ease: "easeOut" }}
         >
-          우이미와 함께 <br /> 환경 지켜요
+          {type === "stay" ? (
+            <>
+              우리는
+              <br />
+              오늘도
+              <br />
+              이별을 미뤘다
+            </>
+          ) : (
+            <>
+              우리는
+              <br />
+              이별을
+              <br />
+              미루기로 했다.
+            </>
+          )}
         </motion.p>
       </motion.div>
       {loading && <p className="mt-4">이미지를 캡처하고 업로드 중입니다...</p>}

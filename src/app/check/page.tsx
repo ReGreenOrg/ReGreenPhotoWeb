@@ -26,6 +26,11 @@ export default function CheckPage() {
       return;
     }
 
+    // 추후 아래와 같이 이미지를 서버에 업로드하는 로직을 추가할 수 있습니다.
+    // const images = JSON.parse(localStorage.getItem("selectedImages") || "[]") as string[];
+
+    localStorage.setItem("selectedImages", JSON.stringify(selectedImages));
+
     if (type === "이별") {
       router.push("/result/bye");
       return;
