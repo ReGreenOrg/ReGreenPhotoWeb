@@ -8,7 +8,6 @@ export default function CheckPage() {
   const router = useRouter();
   const [allImages, setAllImages] = useState<string[]>([]);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
-  const [frameStyle, setFrameStyle] = useState("white");
 
   useEffect(() => {
     const raw = localStorage.getItem("allCaptures");
@@ -21,14 +20,20 @@ export default function CheckPage() {
     );
   };
 
-  const handleNext = () => {
+  const handleNext = (type: string) => {
     if (selectedImages.length !== 4) {
       alert("4장을 선택해주세요");
       return;
     }
-    localStorage.setItem("selectedImages", JSON.stringify(selectedImages));
-    localStorage.setItem("frameStyle", frameStyle);
-    router.push("/result");
+
+    if (type === "이별") {
+      router.push("/result/bye");
+      return;
+    }
+    if (type === "유지") {
+      router.push("/result/stay");
+      return;
+    }
   };
 
   return (
@@ -41,8 +46,8 @@ export default function CheckPage() {
           <Image
             key={idx}
             src={img}
-            width={160}
-            height={120}
+            width={160 * 2}
+            height={120 * 2}
             alt={`shot-${idx}`}
             onClick={() => toggleSelect(img)}
             className={`cursor-pointer border-4 rounded-xl shadow-lg transition-transform duration-200 hover:scale-105 ${
@@ -55,23 +60,19 @@ export default function CheckPage() {
         ))}
       </div>
       <div className="mb-6 flex items-center justify-center gap-4">
-        <label className="mr-2 text-lg font-semibold text-blue-500">프레임 색상:</label>
-        <select
-          value={frameStyle}
-          onChange={(e) => setFrameStyle(e.target.value)}
-          className="px-3 py-2 rounded-lg border-2 border-blue-200 bg-white text-blue-600 focus:outline-none focus:ring-2 focus:ring-pink-200"
+        <button
+          onClick={() => handleNext("유지")}
+          className="px-10 py-3 bg-pink-400  text-white text-lg font-bold rounded-full shadow-lg hover:scale-105 transition"
         >
-          <option value="white">흰색</option>
-          <option value="black">검정</option>
-          <option value="skyblue">하늘색</option>
-        </select>
+          유지존
+        </button>
+        <button
+          onClick={() => handleNext("이별")}
+          className="px-10 py-3 bg-white text-pink-400 text-lg font-bold rounded-full shadow-lg hover:scale-105 transition"
+        >
+          이별존
+        </button>
       </div>
-      <button
-        onClick={handleNext}
-        className="px-10 py-3 bg-gradient-to-r from-pink-400 to-blue-400 text-white text-lg font-bold rounded-full shadow-lg hover:scale-105 transition"
-      >
-        다음
-      </button>
     </div>
   );
 }
