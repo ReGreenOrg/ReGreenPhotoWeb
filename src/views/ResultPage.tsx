@@ -36,13 +36,15 @@ export default function ResultPage({ type }: { type: string }) {
         const blob = await toBlob(node, {
           cacheBust: true,
           style: {
-            transform: "scale(1)", // 필요시 이미지 뒤틀림 방지
+            transform: "scale(1)",
           },
+
+          pixelRatio: 3,
         });
 
         if (!blob) throw new Error("이미지 캡처 실패");
 
-        const file = new File([blob], "final.png", { type: "image/png" });
+        const file = new File([blob], "우이미_네컷.png", { type: "image/png" });
         const res = await startUpload([file]);
 
         const uploaded = res?.[0];

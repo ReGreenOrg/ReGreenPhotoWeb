@@ -1,69 +1,46 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 
-export default function HomePage() {
-  const [progress, setProgress] = useState(0);
-  const [captures, setCaptures] = useState<string[]>([]);
-  const videoRef = useRef<HTMLVideoElement>(null);
+const Page = () => {
   const router = useRouter();
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && navigator.mediaDevices?.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      });
-    } else {
-      console.error("getUserMedia를 지원하지 않는 환경입니다.");
-    }
-  }, []);
-
-  const capturePhoto = () => {
-    console.log("촬영 버튼 클릭됨");
-    if (!videoRef.current) return;
-    const canvas = document.createElement("canvas");
-    canvas.width = 320;
-    canvas.height = 240;
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.drawImage(videoRef.current, 0, 0, 320, 240);
-      const dataUrl = canvas.toDataURL("image/png");
-      setCaptures((prev) => [...prev, dataUrl]);
-      setProgress((p) => p + 1);
-    }
-  };
-
-  useEffect(() => {
-    if (progress === 8) {
-      localStorage.setItem("allCaptures", JSON.stringify(captures));
-      router.push("/check");
-    }
-  }, [progress]);
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-      <h1 className="text-4xl font-extrabold mb-6 text-pink-600 ">{progress}/8</h1>
-      <div className="bg-white rounded-3xl shadow-2xl p-8  flex flex-col items-center">
-        <video
-          ref={videoRef}
-          autoPlay
-          width={1000}
-          height={960}
-          className="mx-auto mb-6 rounded-2xl shadow-lg"
-          style={{ transform: "scaleX(-1)" }}
-        />
-        {progress < 8 && (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-pink-100 px-4 py-8">
+      <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl p-16 flex flex-col items-center space-y-8 max-w-xl w-full border border-pink-200">
+        <h1 className="text-5xl font-extrabold text-pink-500 text-center tracking-tight leading-tight drop-shadow-md">
+          우이미 촬영하기!
+        </h1>
+        <p className="text-center text-xl text-gray-800 leading-relaxed">
+          <span className="font-semibold text-pink-600">퀴즈 푸느라 고생하셨어요!</span> <br />
+          이별을 막아내셨나요?
+        </p>
+        <p className="text-center text-lg text-gray-600 leading-relaxed">
+          우이미와 함께한 순간을 <span className="font-semibold text-pink-500">네컷</span>으로
+          남겨보세요!
+          <br />
+          <span className="font-medium">8초마다 한 장씩 자동 촬영 🎞️</span> <br />
+          또는, <span className="underline decoration-pink-400 decoration-2">직접 촬영</span>도
+          가능해요!
+        </p>
+
+        <div className="flex space-x-6 mt-4">
           <button
-            className="mt-2 px-8 py-3 bg-pink-400  text-white text-lg font-bold rounded-full shadow-lg hover:scale-105 transition"
-            onClick={capturePhoto}
+            className="px-8 py-4 bg-gradient-to-r from-pink-400 to-pink-500 text-2xl text-white font-bold rounded-full shadow-xl hover:scale-110 hover:brightness-110 transition-transform duration-200"
+            onClick={() => router.push("/home/bye")}
           >
-            {progress === 0 ? "촬영 시작" : "다음 컷 촬영"}
+            이별존
           </button>
-        )}
+          <button
+            className="px-8 py-4 bg-gradient-to-r from-pink-500 to-pink-600 text-2xl text-white font-bold rounded-full shadow-xl hover:scale-110 hover:brightness-110 transition-transform duration-200"
+            onClick={() => router.push("/home/stay")}
+          >
+            유지존
+          </button>
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default Page;
