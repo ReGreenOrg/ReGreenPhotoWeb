@@ -48,7 +48,8 @@ export default function ResultPage({ type }: { type: string }) {
         const uploaded = res?.[0];
         if (uploaded?.url) {
           setFinalUrl(uploaded.url);
-          setMobileUrl(`${process.env.NEXT_PUBLIC_VERCEL_URL}/save/${uploaded.url}`);
+          const encodedUrl = encodeURIComponent(uploaded.url);
+          setMobileUrl(`${process.env.NEXT_PUBLIC_VERCEL_URL}/save/${encodedUrl}`);
         }
       } catch (err) {
         console.error("이미지 업로드 실패:", err);
