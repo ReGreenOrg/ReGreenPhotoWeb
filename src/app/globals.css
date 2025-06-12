@@ -1,6 +1,26 @@
 @import "tailwindcss";
 @source "../node_modules/@uploadthing/react/dist";
 
+@font-face {
+  font-family: "MapoGoldenPier";
+  src: url("/MapoGoldenPier.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "LINESeedKR";
+  src: url("/LINESeedKR-Th.woff2") format("woff2"), url("/LINESeedKR-Rg.woff2") format("woff2"),
+    url("/LINESeedKR-Bd.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+}
+.font-mapo {
+  font-family: "MapoGoldenPier", sans-serif;
+}
+.font-line {
+  font-family: "LINESeedKR", sans-serif;
+}
 :root {
   --background: #ffffff;
   --foreground: #171717;

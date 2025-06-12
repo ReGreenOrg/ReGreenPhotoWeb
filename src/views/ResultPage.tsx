@@ -5,39 +5,34 @@ import { QRCodeSVG } from "qrcode.react";
 import { generateReactHelpers } from "@uploadthing/react";
 import type { OurFileRouter } from "@/app/api/uploadthing/core";
 import { toBlob } from "html-to-image";
-import { motion } from "framer-motion";
-
-const FRAME_COLORS: Record<string, string> = {
-  white: "bg-[#ffffff]",
-  black: "bg-[#000000]",
-  skyblue: "bg-[#87ceeb]",
-};
+import Link from "next/link";
+import Image from "next/image";
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
 export default function ResultPage({ type }: { type: string }) {
   const resultRef = useRef<HTMLDivElement>(null);
   const [finalUrl, setFinalUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [mobileUrl, setMobileUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
   const { startUpload } = useUploadThing("photoUploader");
 
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
-  const [frameStyle, setFrameStyle] = useState("white");
 
   useEffect(() => {
     const images = JSON.parse(localStorage.getItem("selectedImages") || "[]") as string[];
-    const frame = localStorage.getItem("frameStyle") || "white";
     setSelectedImages(images);
-    setFrameStyle(frame);
   }, []);
 
   useEffect(() => {
+    setLoading(true);
     if (!resultRef.current || selectedImages.length !== 4) return;
 
     const timer = setTimeout(async () => {
       const node = resultRef.current!;
       try {
-        // ✅ html-to-image를 사용한 캡처
+        // html-to-image를 사용한 캡처
         const blob = await toBlob(node, {
           cacheBust: true,
           style: {
@@ -54,6 +49,7 @@ export default function ResultPage({ type }: { type: string }) {
         if (uploaded?.url) {
           setFinalUrl(uploaded.url);
         }
+        setMobileUrl(`https://${process.env.NEXT_PUBLIC_VERCEL_URL}/result/${finalUrl}`);
       } catch (err) {
         console.error("이미지 업로드 실패:", err);
       } finally {
@@ -65,82 +61,72 @@ export default function ResultPage({ type }: { type: string }) {
   }, [selectedImages]);
 
   return (
-    <div className="h-full flex flex-col items-center justify-center bg-gradient-to-b from-pink-100 to-blue-100  p-2">
-      <div className="flex justify-center items-center gap-32">
-        <motion.h2
-          className="text-3xl  mt-4 font-extrabold mb-6 text-pink-400 "
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          우이미 네컷
-        </motion.h2>
-        <motion.a
-          href="/"
-          className="text-lg font-semibold text-pink-400 underline transition-colors"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
-        >
-          홈으로
-        </motion.a>
-      </div>
-      {finalUrl && (
-        <motion.div
-          className=" left-3 top-3 flex justify-center gap-10 items-center z-10 mb-4"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.7, ease: "easeOut" }}
-        >
-          <QRCodeSVG value={finalUrl} size={64} />
-          <span className="mt-1 text-md font-bold">큐알로 인식해 이미지를 다운하세요!</span>
-        </motion.div>
-      )}
-      <motion.div
-        ref={resultRef}
-        className={`relative mx-auto flex flex-col gap-4 sm:gap-5 p-3 sm:p-6 rounded-3xl shadow-2xl ${FRAME_COLORS[frameStyle]}`}
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+    <div className="h-screen w-full flex  bg-white ">
+      {/* 좌측 화면 */}
+      <div
+        className={`w-[50%] h-screen flex justify-center items-center ${
+          type === "stay" ? "bg-[#FFEAF7]" : "bg-[#EAEEFF]"
+        }`}
       >
-        {selectedImages.map((src, idx) => (
-          <motion.img
-            key={idx}
-            src={src}
-            alt={`선택 이미지 ${idx + 1}`}
-            className="w-full h-auto rounded-xl"
-            style={{ transform: "scaleX(-1)" }}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.4 + idx * 0.15, ease: "easeOut" }}
-          />
-        ))}
-        <motion.p
-          className="text-center text-base font-semibold text-pink-500 mt-2 tracking-wide drop-shadow-sm"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.7, ease: "easeOut" }}
+        <div
+          ref={resultRef}
+          className={`relative  flex flex-col gap-4 sm:gap-5 p-3 sm:p-6 bg-white w-fit shadow-2xl`}
         >
-          {type === "stay" ? (
-            <>
-              우리는
-              <br />
-              오늘도
-              <br />
-              이별을 미뤘다
-            </>
-          ) : (
-            <>
-              우리는
-              <br />
-              이별을
-              <br />
-              미루기로 했다.
-            </>
+          {selectedImages.map((src, idx) => (
+            <img
+              key={idx}
+              src={src}
+              alt={`선택 이미지 ${idx + 1}`}
+              className="w-[240px] h-auto transform scale-x-[-1]"
+            />
+          ))}
+          <div className="flex flex-col items-center mb-4">
+            <Image src="/photoLogo.svg" alt="Photo Logo" width={64} height={84} />
+            <p className="text-center font-line font-normal text-sm">
+              {type === "stay" ? (
+                <>우리는 오늘도 이별을 미뤘다</>
+              ) : (
+                <>우리는 이별을 미루기로 했다.</>
+              )}
+            </p>
+          </div>
+        </div>
+      </div>
+      {/* 우측 화면 */}
+      <div className="w-[50%] relative h-screen flex justify-center items-center bg-white">
+        <Link href="/" className="absolute top-10 left-10 z-10">
+          <Image src="/homeLogo.svg" alt="Home" width={180} height={68} />
+        </Link>
+        <div className="flex flex-col gap-[90px]">
+          <div className="font-mapo text-[43px] text-center">
+            {type === "stay" ? (
+              <p className="">
+                우리는
+                <br /> 오늘도 <br />
+                이별을 미뤘다
+              </p>
+            ) : (
+              <p>
+                우리는
+                <br />
+                이별을 <br />
+                미루기로 했다.
+              </p>
+            )}
+          </div>
+          {loading && !finalUrl && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50">
+              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-pink-400 border-solid"></div>
+            </div>
           )}
-        </motion.p>
-      </motion.div>
-      {loading && <p className="mt-4">이미지를 캡처하고 업로드 중입니다...</p>}
+          {mobileUrl && (
+            <div className=" flex flex-col justify-center gap-10 items-center">
+              <QRCodeSVG value={mobileUrl} size={167} />
+              <span className=" font-regular text-[28px]">QR코드를 통해 사진 저장</span>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
