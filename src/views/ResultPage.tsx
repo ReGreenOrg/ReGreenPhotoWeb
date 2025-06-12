@@ -49,7 +49,7 @@ export default function ResultPage({ type }: { type: string }) {
         if (uploaded?.url) {
           setFinalUrl(uploaded.url);
         }
-        setMobileUrl(`https://${process.env.NEXT_PUBLIC_VERCEL_URL}/result/${finalUrl}`);
+        setMobileUrl(`${process.env.NEXT_PUBLIC_VERCEL_URL}/save/${finalUrl}`);
       } catch (err) {
         console.error("이미지 업로드 실패:", err);
       } finally {
