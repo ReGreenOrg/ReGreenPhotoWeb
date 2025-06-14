@@ -8,8 +8,23 @@ export default function HomePage({ type }: { type: string }) {
   const [captures, setCaptures] = useState<string[]>([]);
   const [seconds, setSeconds] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const router = useRouter();
+  useEffect(() => {
+    audioRef.current = new Audio("/camera.mp3");
 
+    audioRef.current.onloadstart = () => {
+      console.log("오디오 파일 로딩 시작");
+    };
+
+    audioRef.current.oncanplaythrough = () => {
+      console.log("오디오 파일이 로드되었습니다.");
+    };
+
+    audioRef.current.onerror = (error) => {
+      console.error("오디오 파일 로드 중 오류:", error);
+    };
+  }, []);
   // 캡처 로직: 최대 8컷까지만 동작
   const capturePhoto = useCallback(() => {
     if (!videoRef.current || progress >= 8) return;
@@ -59,21 +74,42 @@ export default function HomePage({ type }: { type: string }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [capturePhoto]);
 
+  const handleAudioPlay = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch((err) => {
+        console.error("오디오 재생 오류:", err);
+        capturePhoto(); // 오디오 재생 오류 시에도 촬영 진행
+      });
+    }
+  };
+
   // 3) 10초마다 자동 촬영
   useEffect(() => {
     if (progress >= 8) return;
+
     const interval = setInterval(() => {
+      // 1초 전에 오디오 재생
+      setTimeout(() => {
+        handleAudioPlay();
+      }, 9500); // 500ms 전에 오디오 재생
+
+      // 10초 후에 촬영
       capturePhoto();
+      setSeconds(0); // 촬영 후 타이머 초기화
     }, 10000);
+
     return () => clearInterval(interval);
   }, [progress, capturePhoto]);
 
   // 4) 타이머(초) 증가
   useEffect(() => {
     if (progress >= 8) return;
+
     const timer = setInterval(() => {
       setSeconds((prev) => prev + 1);
     }, 1000);
+
     return () => clearInterval(timer);
   }, [progress]);
 
@@ -84,6 +120,21 @@ export default function HomePage({ type }: { type: string }) {
       router.push(`/check/${type}`);
     }
   }, [progress, captures, router, type]);
+
+  // 오디오 초기화
+  useEffect(() => {
+    audioRef.current = new Audio("/camera.ogg");
+  }, []);
+
+  const handleStartCapture = () => {
+    handleAudioPlay(); // 오디오 재생
+
+    setSeconds(0);
+
+    setTimeout(() => {
+      capturePhoto(); // 1초 후 촬영 시작
+    }, 1000);
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white">
@@ -109,7 +160,7 @@ export default function HomePage({ type }: { type: string }) {
         {progress < 8 && (
           <button
             className="mt-2 px-8 py-3 bg-pink-400 text-white text-lg font-bold rounded-full shadow-lg hover:scale-105 transition"
-            onClick={capturePhoto}
+            onClick={handleStartCapture}
           >
             {progress === 0 ? "촬영 시작" : "다음 컷 촬영"}
           </button>
