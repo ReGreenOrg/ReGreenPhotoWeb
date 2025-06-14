@@ -59,12 +59,12 @@ export default function HomePage({ type }: { type: string }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [capturePhoto]);
 
-  // 3) 8초마다 자동 촬영
+  // 3) 10초마다 자동 촬영
   useEffect(() => {
     if (progress >= 8) return;
     const interval = setInterval(() => {
       capturePhoto();
-    }, 8000);
+    }, 10000);
     return () => clearInterval(interval);
   }, [progress, capturePhoto]);
 
@@ -98,11 +98,11 @@ export default function HomePage({ type }: { type: string }) {
             style={{ transform: "scaleX(-1)" }}
           />
           {/* 좌측 상단 타이머 */}
-          <div className="absolute top-4 left-4 text-3xl text-white bg-pink-400 bg-opacity-50 px-2 py-1 rounded">
+          <div className="absolute top-4 left-4 text-8xl text-white bg-pink-400 bg-opacity-50 px-2 py-1 rounded">
             {Math.floor(seconds / 60)}:{(seconds % 60).toString().padStart(2, "0")}
           </div>
           {/* 우측 상단 촬영 횟수 */}
-          <div className="absolute top-4 right-4 text-3xl text-white bg-pink-400 bg-opacity-50 px-2 py-1 rounded">
+          <div className="absolute top-4 right-4 text-8xl text-white bg-pink-400 bg-opacity-50 px-2 py-1 rounded">
             {progress} / 8
           </div>
         </div>
