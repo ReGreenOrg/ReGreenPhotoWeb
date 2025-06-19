@@ -2,21 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { generateReactHelpers } from "@uploadthing/react";
-import type { OurFileRouter } from "@/app/api/uploadthing/core";
 import { toBlob } from "html-to-image";
 import Link from "next/link";
 import Image from "next/image";
-
-const { useUploadThing } = generateReactHelpers<OurFileRouter>();
+import { postFile } from "@/lib/postFile";
 
 export default function ResultPage({ type }: { type: string }) {
   const resultRef = useRef<HTMLDivElement>(null);
   const [finalUrl, setFinalUrl] = useState<string | null>(null);
   const [mobileUrl, setMobileUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-
-  const { startUpload } = useUploadThing("photoUploader");
 
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
 
@@ -45,12 +40,11 @@ export default function ResultPage({ type }: { type: string }) {
         if (!blob) throw new Error("이미지 캡처 실패");
 
         const file = new File([blob], "우이미_네컷.png", { type: "image/png" });
-        const res = await startUpload([file]);
+        const res = await postFile([file]);
 
-        const uploaded = res?.[0];
-        if (uploaded?.url) {
-          setFinalUrl(uploaded.url);
-          const encodedUrl = encodeURIComponent(uploaded.url);
+        if (res.code === 2000) {
+          setFinalUrl(res.data.imageUrl);
+          const encodedUrl = encodeURIComponent(res.data.imageUrl);
           setMobileUrl(`${process.env.NEXT_PUBLIC_VERCEL_URL}/save/${encodedUrl}`);
         }
       } catch (err) {
