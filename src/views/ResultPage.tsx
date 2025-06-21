@@ -95,7 +95,7 @@ export default function ResultPage({ type }: { type: string }) {
           <Image src="/homeLogo.svg" alt="Home" width={180} height={68} />
         </Link>
         <div className="flex flex-col gap-[90px]">
-          <div className="font-mapo text-[43px] text-center">
+          <div className="font-mapo text-4xl text-center">
             {type === "stay" ? (
               <p className="">
                 우리는
