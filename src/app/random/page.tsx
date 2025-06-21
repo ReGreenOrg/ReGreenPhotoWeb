@@ -47,6 +47,7 @@ const saveToLocalStorage = (prize: Prize) => {
 const RandomPage = () => {
   const [imageSrc, setImageSrc] = useState(DEFAULT_IMG);
   const [isAnimating, setIsAnimating] = useState(false);
+
   const [resultText, setResultText] = useState("");
   const [version, setVersion] = useState(1);
   const [versionExpand, setVersionExpand] = useState(false);
@@ -54,6 +55,7 @@ const RandomPage = () => {
   const handleDraw = (modifier: number) => {
     if (isAnimating) return;
     setIsAnimating(true);
+
     setResultText("");
     setImageSrc(DEFAULT_IMG);
 
@@ -62,6 +64,7 @@ const RandomPage = () => {
       saveToLocalStorage(result);
       setImageSrc(result === "first" ? FIRST_IMG : result === "second" ? SECOND_IMG : THIRD_IMG);
       setResultText(PRIZE_TEXT[result]);
+
       setIsAnimating(false);
     }, 4000);
   };
@@ -100,9 +103,7 @@ const RandomPage = () => {
   return (
     <div className="items-center justify-center h-[100vh] text-center bg-gray-950">
       <motion.div className={"absolute -z-0 w-[100vw] h-[100vh]"}>
-        <Aurora
-          colorStops={["#4b4c1e", "#233a56", "#bd63ed"]}
-        />
+        <Aurora colorStops={["#4b4c1e", "#233a56", "#bd63ed"]} />
       </motion.div>
       <motion.div className={"absolute z-10 h-[100vh] w-[100vw]"}>
         <Ballpit_t
@@ -120,6 +121,20 @@ const RandomPage = () => {
           className={"z-10 h-[100vh] w-[100vw]"}
         />
       </motion.div>
+      {isAnimating || resultText !== "" ? (
+        <></>
+      ) : (
+        <div className={"absolute z-30 top-10 right-10 font-bold"}>
+          <GameButton
+            onClick={() => {
+              setVersion(version > 3 ? 1 : version + 1);
+            }}
+            className={"px-10 h-20 rounded-full bg-black opacity-20 text-white text-3xl"}
+          >
+            {version} · {VERSION_TEXT[version - 1]}
+          </GameButton>
+        </div>
+      )}
       {
         isAnimating || resultText !== "" ? <></>:
           <motion.div className={`absolute z-30 font-bold duration-300 ${versionExpand ? "top-20 right-20" : "top-10 right-10"}`}
@@ -237,7 +252,7 @@ const RandomPage = () => {
         {/*>*/}
         {/*  🔥 인스타, 설문, 가입 완료 (확률 UP UP UP)*/}
         {/*</button>*/}
-    </motion.div>
+      </motion.div>
     </div>
   );
 };
@@ -253,20 +268,24 @@ export function GameButton(props: GameButtonProps) {
 
   return (
     <motion.button
-      onClick={()=>props.onClick()}
-      className={props.className + " duration-100 ease-out " + (isPressed ? "translate-y-3 scale-y-95" : "")}
-      onMouseDown={()=>setIsPressed(true)}
-      onMouseUp={()=>setIsPressed(false)}
-      onMouseLeave={()=>setIsPressed(false)}
-    >{props.children}</motion.button>
-  )
+      onClick={() => props.onClick()}
+      className={
+        props.className + " duration-100 ease-out " + (isPressed ? "translate-y-3 scale-y-95" : "")
+      }
+      onMouseDown={() => setIsPressed(true)}
+      onMouseUp={() => setIsPressed(false)}
+      onMouseLeave={() => setIsPressed(false)}
+    >
+      {props.children}
+    </motion.button>
+  );
 }
 
 type CircularGameButtonProps = {
-  children?: React.ReactNode,
-  className?: string,
-  onClick: () => void
-}
+  children?: React.ReactNode;
+  className?: string;
+  onClick: () => void;
+};
 
 export function CircularGameButton(props: CircularGameButtonProps) {
   const [isPressed, setIsPressed] = useState(false);
@@ -291,7 +310,7 @@ export function CircularGameButton(props: CircularGameButtonProps) {
         <div className={"absolute inset-0 flex items-center justify-center"}>뽑기</div>
       </div>
     </motion.button>
-  )
+  );
 }
 
 export default RandomPage;
