@@ -121,7 +121,7 @@ const SavePage = ({ url }: { url: string }) => {
       <div className="flex justify-center items-center p-4 bg-gray-50 ">
         {isLoading ? (
           // 로딩 중 회전 하는 스피너
-          <div className="animate-spin h-10 w-10 border-4 border-t-transparent border-pink-500 rounded-full"></div>
+          <div className="fixed top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] animate-spin h-10 w-10 border-4 border-t-transparent border-pink-500 rounded-full"></div>
         ) : file ? (
           <Image
             src={url}
