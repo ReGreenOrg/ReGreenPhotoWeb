@@ -27,6 +27,7 @@ export default function ResultPage({ type }: { type: string }) {
     const timer = setTimeout(async () => {
       const node = resultRef.current!;
       try {
+        await document.fonts.ready;
         // html-to-image를 사용한 캡처
         const blob = await toBlob(node, {
           cacheBust: true,
