@@ -44,8 +44,8 @@ export default function ResultPage({ type }: { type: string }) {
 
         if (res.code === 2000) {
           setFinalUrl(res.data.imageUrl);
-          const encodedUrl = encodeURIComponent(res.data.imageUrl);
-          setMobileUrl(`${process.env.NEXT_PUBLIC_VERCEL_URL}/save/${encodedUrl}`);
+          const encodeUrl = encodeURIComponent(res.data.imageUrl);
+          setMobileUrl(`${process.env.NEXT_PUBLIC_VERCEL_URL}/save/${encodeUrl}`);
         }
       } catch (err) {
         console.error("이미지 업로드 실패:", err);
