@@ -120,7 +120,8 @@ const SavePage = ({ url }: { url: string }) => {
       {/* 하단 이미지 미리보기 영역 */}
       <div className="flex justify-center items-center p-4 bg-gray-50 ">
         {isLoading ? (
-          <div className="w-[320px] h-[240px] bg-gray-200 animate-pulse rounded-md shadow-inner" />
+          // 로딩 중 회전 하는 스피너
+          <div className="animate-spin h-10 w-10 border-4 border-t-transparent border-pink-500 rounded-full"></div>
         ) : file ? (
           <Image
             src={url}
