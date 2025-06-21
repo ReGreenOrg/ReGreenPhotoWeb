@@ -3,10 +3,11 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
-import Aurora from "../ui/Aurora";
-import Ballpit_t from "@/app/ui/Ballpit_t";
-import GradientText from "@/app/ui/GradientText";
-import CircularText from "@/app/ui/CircularText";
+import Aurora from "@/ui/Aurora";
+import Ballpit_t from "@/ui/Ballpit_t";
+import GradientText from "@/ui/GradientText";
+import { GameButton } from "@/ui/GameButton";
+import { CircularGameButton } from "@/ui/CircularGameButton";
 
 const DEFAULT_IMG = "/random/default.png";
 const FIRST_IMG = "/random/item-minop.png";
@@ -24,12 +25,14 @@ const PRIZE_TEXT: Record<Prize, string> = {
 const VERSION_TEXT = ["기본", "인스타", "인스타+설문", "인스타+설문+가입"];
 
 const getRandomPrize = (modifier: number = 1): Prize => {
-  const first = parseFloat(process.env.NEXT_PUBLIC_RANDOM_RATIO_FIRST || "0.1") * modifier;
-  const second = parseFloat(process.env.NEXT_PUBLIC_RANDOM_RATIO_SECOND || "0.2") * modifier;
+  const first = Number(process.env.NEXT_PUBLIC_RANDOM_RATIO_FIRST ?? "0.1") * modifier;
+  const second = Number(process.env.NEXT_PUBLIC_RANDOM_RATIO_SECOND ?? "0.2") * modifier;
+  const third = Number(process.env.NEXT_PUBLIC_RANDOM_RATIO_THIRD ?? "0.7") * modifier;
 
   const rand = Math.random();
   if (rand < first) return "first";
   if (rand < first + second) return "second";
+  if (rand < first + second + third) return "third";
   return "third";
 };
 
@@ -132,14 +135,6 @@ const RandomPage = () => {
             </motion.h1>
           </motion.div>
         ) : null}
-        {/*<div className="relative w-64 h-64 flex flex-col items-center">*/}
-        {/*  <Image*/}
-        {/*    src={imageSrc}*/}
-        {/*    alt="추첨 이미지"*/}
-        {/*    fill*/}
-        {/*    className="object-contain rounded-[32px] z-0"*/}
-        {/*  />*/}
-        {/*</div>*/}
         {isAnimating ? (
           <motion.div
             className={
@@ -184,83 +179,9 @@ const RandomPage = () => {
             </GameButton>
           </motion.div>
         )}
-        {/*<button*/}
-        {/*  className="py-3 rounded-lg border border-green-400 bg-green-50 hover:bg-green-100 transition"*/}
-        {/*  onClick={() => handleDraw(1.2)}*/}
-        {/*>*/}
-        {/*  📸 인스타 완료 (확률 UP)*/}
-        {/*</button>*/}
-        {/*<button*/}
-        {/*  className="py-3 rounded-lg border border-purple-400 bg-purple-50 hover:bg-purple-100 transition"*/}
-        {/*  onClick={() => handleDraw(1.5)}*/}
-        {/*>*/}
-        {/*  📊 인스타, 설문 완료 (확률 UP UP)*/}
-        {/*</button>*/}
-        {/*<button*/}
-        {/*  className="py-3 rounded-lg border border-red-400 bg-red-50 hover:bg-red-100 transition"*/}
-        {/*  onClick={() => handleDraw(2)}*/}
-        {/*>*/}
-        {/*  🔥 인스타, 설문, 가입 완료 (확률 UP UP UP)*/}
-        {/*</button>*/}
       </motion.div>
     </div>
   );
 };
-
-type GameButtonProps = {
-  children?: React.ReactNode;
-  className?: string;
-  onClick: () => void;
-};
-
-export function GameButton(props: GameButtonProps) {
-  const [isPressed, setIsPressed] = useState(false);
-
-  return (
-    <motion.button
-      onClick={() => props.onClick()}
-      className={
-        props.className + " duration-100 ease-out " + (isPressed ? "translate-y-3 scale-y-95" : "")
-      }
-      onMouseDown={() => setIsPressed(true)}
-      onMouseUp={() => setIsPressed(false)}
-      onMouseLeave={() => setIsPressed(false)}
-    >
-      {props.children}
-    </motion.button>
-  );
-}
-
-type CircularGameButtonProps = {
-  children?: React.ReactNode;
-  className?: string;
-  onClick: () => void;
-};
-
-export function CircularGameButton(props: CircularGameButtonProps) {
-  const [isPressed, setIsPressed] = useState(false);
-
-  return (
-    <motion.button
-      onClick={() => props.onClick()}
-      className={props.className + " duration-100 ease-out " + (isPressed ? "scale-90" : "")}
-      onMouseDown={() => setIsPressed(true)}
-      onMouseUp={() => setIsPressed(false)}
-      onMouseLeave={() => setIsPressed(false)}
-    >
-      {/* 이 div가 절대 위치 자식의 기준점이 됩니다. */}
-      <div className={"relative"}>
-        <CircularText
-          text="WOOIMI*DRAW*EVENT*"
-          spinDuration={20}
-          onHover={""}
-          className="relative top-0 w-64 h-64 text-gray-300 scale-90"
-        />
-        {/* "뽑기" 텍스트에 절대 위치를 적용합니다. */}
-        <div className={"absolute inset-0 flex items-center justify-center"}>뽑기</div>
-      </div>
-    </motion.button>
-  );
-}
 
 export default RandomPage;
