@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import Aurora from "../ui/Aurora";
 import Ballpit_t from "@/app/ui/Ballpit_t";
 import GradientText from "@/app/ui/GradientText";
@@ -47,7 +47,6 @@ const saveToLocalStorage = (prize: Prize) => {
 const RandomPage = () => {
   const [imageSrc, setImageSrc] = useState(DEFAULT_IMG);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [shine, setShine] = useState(false);
   const [resultText, setResultText] = useState("");
   const [version, setVersion] = useState(1);
 
@@ -55,7 +54,6 @@ const RandomPage = () => {
     if (isAnimating) return;
 
     setIsAnimating(true);
-    setShine(true);
     setResultText("");
     setImageSrc(DEFAULT_IMG);
 
@@ -64,10 +62,34 @@ const RandomPage = () => {
       saveToLocalStorage(result);
       setImageSrc(result === "first" ? FIRST_IMG : result === "second" ? SECOND_IMG : THIRD_IMG);
       setResultText(PRIZE_TEXT[result]);
-      setShine(false);
       setIsAnimating(false);
     }, 4000);
   };
+
+  useEffect(() => {
+    const setKeyManager = (e: KeyboardEvent) => {
+      console.log(e.key);
+      switch (e.key) {
+        case " ": {
+          if (resultText === "") {
+            handleDraw(version);
+          } else {
+            location.reload();
+          }
+          break;
+        }
+        case "1": setVersion(1); break;
+        case "2": setVersion(2); break;
+        case "3": setVersion(3); break;
+        case "4": setVersion(4); break;
+        default: break;
+      }
+    }
+    window.addEventListener("keypress", (e) => setKeyManager(e));
+    return () => {
+      window.removeEventListener("keypress", (e) => setKeyManager(e));
+    }
+  }, [resultText]);
 
   return (
     <div className="items-center justify-center h-[100vh] text-center bg-gray-950">
