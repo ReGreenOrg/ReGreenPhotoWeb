@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import Aurora from "../ui/Aurora";
 import Ballpit_t from "@/app/ui/Ballpit_t";
 import GradientText from "@/app/ui/GradientText";
@@ -49,10 +49,10 @@ const RandomPage = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [resultText, setResultText] = useState("");
   const [version, setVersion] = useState(1);
+  const [versionExpand, setVersionExpand] = useState(false);
 
   const handleDraw = (modifier: number) => {
     if (isAnimating) return;
-
     setIsAnimating(true);
     setResultText("");
     setImageSrc(DEFAULT_IMG);
@@ -67,8 +67,14 @@ const RandomPage = () => {
   };
 
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
     const setKeyManager = (e: KeyboardEvent) => {
-      console.log(e.key);
+      if (isAnimating) return;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      timeoutId = setTimeout(() => setVersionExpand(false), 1000);
       switch (e.key) {
         case " ": {
           if (resultText === "") {
@@ -78,18 +84,18 @@ const RandomPage = () => {
           }
           break;
         }
-        case "1": setVersion(1); break;
-        case "2": setVersion(2); break;
-        case "3": setVersion(3); break;
-        case "4": setVersion(4); break;
+        case "1": setVersionExpand(true); setVersion(1); break;
+        case "2": setVersionExpand(true); setVersion(2); break;
+        case "3": setVersionExpand(true); setVersion(3); break;
+        case "4": setVersionExpand(true); setVersion(4); break;
         default: break;
       }
     }
-    window.addEventListener("keypress", (e) => setKeyManager(e));
+    window.addEventListener("keyup", (e) => setKeyManager(e));
     return () => {
-      window.removeEventListener("keypress", (e) => setKeyManager(e));
+      window.removeEventListener("keyup", (e) => setKeyManager(e));
     }
-  }, [resultText]);
+  }, [handleDraw, isAnimating, resultText, version]);
 
   return (
     <div className="items-center justify-center h-[100vh] text-center bg-gray-950">
@@ -116,16 +122,17 @@ const RandomPage = () => {
       </motion.div>
       {
         isAnimating || resultText !== "" ? <></>:
-          <div className={"absolute z-30 top-10 right-10 font-bold"}>
+          <motion.div className={`absolute z-30 font-bold duration-300 ${versionExpand ? "top-20 right-20" : "top-10 right-10"}`}
+          >
             <GameButton
               onClick={()=>{
                 setVersion(version > 3 ? 1 : version + 1);
               }}
-              className={"px-10 h-20 rounded-full bg-black opacity-20 text-white text-3xl"}
+              className={`px-10 h-20 rounded-full text-3xl duration-300 ${versionExpand ? "scale-120 bg-white opacity-100 text-black" : "scale-100 bg-black opacity-20 text-white"}`}
             >
               {version} · {VERSION_TEXT[version - 1]}
             </GameButton>
-          </div>
+          </motion.div>
       }
       <motion.div
         className={`absolute top-0 w-[100vw] h-[100vh] z-20 flex flex-col items-center justify-center space-y-10 duration-200 ${resultText ? "backdrop-blur-3xl" : ""}`}
@@ -238,7 +245,7 @@ const RandomPage = () => {
 type GameButtonProps = {
   children?: React.ReactNode,
   className?: string,
-  onClick: () => void
+  onClick: () => void,
 }
 
 export function GameButton(props: GameButtonProps) {
