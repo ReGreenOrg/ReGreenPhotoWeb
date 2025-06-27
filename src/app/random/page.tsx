@@ -121,7 +121,7 @@ const RandomPage = () => {
           minSize={1.2}
           colors={["#ed5a8e", "#e2145c", "#bd63ed"]}
           lightIntensity={0}
-          className={"z-10 h-[100vh] w-[100vw]"}
+          className={"z-10 h-[100vh] w-[100vw] "}
         />
       </motion.div>
       {
