@@ -54,6 +54,7 @@ const RandomPage = () => {
   const [resultText, setResultText] = useState("");
   const [version, setVersion] = useState(1);
   const [versionExpand, setVersionExpand] = useState(false);
+  const [isVersionButtonPressed, setIsVersionButtonPressed] = useState(false);
 
   const handleDraw = (modifier: number) => {
     if (isAnimating) return;
@@ -97,9 +98,20 @@ const RandomPage = () => {
         default: break;
       }
     }
+
+    const setKeyPress = (e: KeyboardEvent, press: boolean) => {
+      if (e.key === "1" || e.key === "2" || e.key === "3" || e.key === "4") {
+        setIsVersionButtonPressed(press);
+      }
+    }
+
+    window.addEventListener("keydown", (e) => setKeyPress(e, true));
+    window.addEventListener("keyup", (e) => setKeyPress(e, false));
     window.addEventListener("keyup", (e) => setKeyManager(e));
     return () => {
       window.removeEventListener("keyup", (e) => setKeyManager(e));
+      window.removeEventListener("keyup", (e) => setKeyPress(e, false));
+      window.removeEventListener("keydown", (e) => setKeyPress(e, true));
     }
   }, [handleDraw, isAnimating, resultText, version]);
 
@@ -126,7 +138,7 @@ const RandomPage = () => {
       </motion.div>
       {
         isAnimating || resultText !== "" ? <></>:
-          <motion.div className={`absolute z-30 font-bold duration-300 ${versionExpand ? "top-20 right-20" : "top-10 right-10"}`}
+          <motion.div className={`absolute z-30 font-bold duration-200 ${versionExpand ? "top-20 right-20" : "top-10 right-10"} ${isVersionButtonPressed ? "scale-90" : "scale-100"}`}
           >
             <GameButton
               onClick={()=>{
