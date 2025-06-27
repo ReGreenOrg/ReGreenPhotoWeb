@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Aurora from "@/ui/Aurora";
 import Ballpit_t from "@/ui/Ballpit_t";
 import GradientText from "@/ui/GradientText";
@@ -22,7 +22,12 @@ const PRIZE_TEXT: Record<Prize, string> = {
   third: "3등 당첨!/*/우이미 로고 각인 대나무 칫솔",
 };
 
-const VERSION_TEXT = ["기본", "인스타", "인스타+설문", "인스타+설문+가입"];
+const VERSION_TEXT = [
+  "기본",
+  "인스타",
+  "인스타+설문",
+  "인스타+설문+가입",
+];
 
 const getRandomPrize = (modifier: number = 1): Prize => {
   const first = Number(process.env.NEXT_PUBLIC_RANDOM_RATIO_FIRST ?? "0.1") * modifier;
@@ -48,10 +53,10 @@ const RandomPage = () => {
 
   const [resultText, setResultText] = useState("");
   const [version, setVersion] = useState(1);
+  const [versionExpand, setVersionExpand] = useState(false);
 
   const handleDraw = (modifier: number) => {
     if (isAnimating) return;
-
     setIsAnimating(true);
 
     setResultText("");
@@ -66,6 +71,37 @@ const RandomPage = () => {
       setIsAnimating(false);
     }, 4000);
   };
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const setKeyManager = (e: KeyboardEvent) => {
+      if (isAnimating) return;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      timeoutId = setTimeout(() => setVersionExpand(false), 1000);
+      switch (e.key) {
+        case " ": {
+          if (resultText === "") {
+            handleDraw(version);
+          } else {
+            location.reload();
+          }
+          break;
+        }
+        case "1": setVersionExpand(true); setVersion(1); break;
+        case "2": setVersionExpand(true); setVersion(2); break;
+        case "3": setVersionExpand(true); setVersion(3); break;
+        case "4": setVersionExpand(true); setVersion(4); break;
+        default: break;
+      }
+    }
+    window.addEventListener("keyup", (e) => setKeyManager(e));
+    return () => {
+      window.removeEventListener("keyup", (e) => setKeyManager(e));
+    }
+  }, [handleDraw, isAnimating, resultText, version]);
 
   return (
     <div className="items-center justify-center h-[100vh] text-center bg-gray-950">
@@ -88,20 +124,20 @@ const RandomPage = () => {
           className={"z-10 h-[100vh] w-[100vw]"}
         />
       </motion.div>
-      {isAnimating || resultText !== "" ? (
-        <></>
-      ) : (
-        <div className={"absolute z-30 top-10 right-10 font-bold"}>
-          <GameButton
-            onClick={() => {
-              setVersion(version > 3 ? 1 : version + 1);
-            }}
-            className={"px-10 h-20 rounded-full bg-black opacity-20 text-white text-3xl"}
+      {
+        isAnimating || resultText !== "" ? <></>:
+          <motion.div className={`absolute z-30 font-bold duration-300 ${versionExpand ? "top-20 right-20" : "top-10 right-10"}`}
           >
-            {version} · {VERSION_TEXT[version - 1]}
-          </GameButton>
-        </div>
-      )}
+            <GameButton
+              onClick={()=>{
+                setVersion(version > 3 ? 1 : version + 1);
+              }}
+              className={`px-10 h-20 rounded-full text-3xl duration-300 ${versionExpand ? "scale-120 bg-white opacity-100 text-black" : "scale-100 bg-black opacity-20 text-white"}`}
+            >
+              {version} · {VERSION_TEXT[version - 1]}
+            </GameButton>
+          </motion.div>
+      }
       <motion.div
         className={`absolute top-0 w-[100vw] h-[100vh] z-20 flex flex-col items-center justify-center space-y-10 duration-200 ${
           resultText ? "backdrop-blur-3xl" : ""
@@ -135,50 +171,52 @@ const RandomPage = () => {
             </motion.h1>
           </motion.div>
         ) : null}
-        {isAnimating ? (
-          <motion.div
-            className={
-              "absolute bottom-10 px-10 py-5 rounded-full bg-gray-900 border-2 border-gray-800 text-white font-bold text-3xl"
-            }
-            initial={{
-              y: 30,
-              opacity: 0,
-            }}
-            animate={{
-              y: 0,
-              opacity: 1,
-            }}
-          >
-            <GradientText
-              colors={["#ed5a8e", "#ffffff", "#bd63ed"]}
-              animationSpeed={5}
-              showBorder={false}
-              className="custom-class"
-            >
-              <div className={"text-3xl font-black"}>두근두근, 무엇이 나올까요?</div>
-            </GradientText>
-          </motion.div>
-        ) : resultText == "" ? (
-          <CircularGameButton
-            className="w-64 h-64 rounded-full font-extrabold text-5xl border-gray-300 bg-gray-100 hover:bg-gray-100 transition"
-            onClick={() => handleDraw(version)}
-          >
-            뽑기
-          </CircularGameButton>
-        ) : (
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="">
-            <GameButton
-              onClick={() => {
-                location.reload();
-              }}
-              className={
-                "backdrop-contrast-200 backdrop-saturate-150 min-w-96 px-10 py-10 font-bold text-3xl text-white border-2 border-white/20 bg-white/10 rounded-full"
-              }
-            >
-              운영진에게 화면을 보여주세요
-            </GameButton>
-          </motion.div>
-        )}
+        {
+          isAnimating
+            ? <motion.div
+                className={"absolute bottom-10 px-10 py-5 rounded-full bg-gray-900 border-2 border-gray-800 text-white font-bold text-3xl"}
+                initial={{
+                  y: 30,
+                  opacity: 0
+                }}
+                animate={{
+                  y: 0,
+                  opacity: 1
+                }}
+              >
+                <GradientText
+                  colors={["#ed5a8e", "#ffffff", "#bd63ed"]}
+                  animationSpeed={5}
+                  showBorder={false}
+                  className="custom-class"
+                >
+                  <div className={"text-3xl font-black"}>두근두근, 무엇이 나올까요?</div>
+                </GradientText>
+
+              </motion.div>
+            : (resultText == "") ?
+                <CircularGameButton
+                  className="w-64 h-64 rounded-full font-extrabold text-5xl border-gray-300 bg-gray-100 hover:bg-gray-100 transition"
+                  onClick={()=>handleDraw(version)}
+                >
+                  뽑기
+                </CircularGameButton>
+                :
+                <motion.div
+                  initial={{opacity: 0, y: 30}}
+                  animate={{opacity: 1, y: 0}}
+                  className=""
+                >
+                  <GameButton
+                    onClick={() => {
+                      location.reload();
+                    }}
+                    className={"backdrop-contrast-200 backdrop-saturate-150 min-w-96 px-10 py-10 font-bold text-3xl text-white border-2 border-white/20 bg-white/10 rounded-full"}
+                  >
+                    운영진에게 화면을 보여주세요
+                  </GameButton>
+                </motion.div>
+        }
       </motion.div>
     </div>
   );
