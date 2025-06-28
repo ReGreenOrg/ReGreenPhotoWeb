@@ -2,11 +2,13 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 export default function HomePage({ type }: { type: string }) {
   const [progress, setProgress] = useState(0);
   const [captures, setCaptures] = useState<string[]>([]);
   const [seconds, setSeconds] = useState(0);
+  const [flash, setFlash] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const router = useRouter();
@@ -37,6 +39,8 @@ export default function HomePage({ type }: { type: string }) {
       const dataUrl = canvas.toDataURL("image/png");
       setCaptures((prev) => [...prev, dataUrl]);
       setProgress((prev) => prev + 1);
+      setFlash(true);
+      setTimeout(()=>setFlash(false), 50);
     }
   }, [progress]);
 
@@ -67,7 +71,7 @@ export default function HomePage({ type }: { type: string }) {
         e.key === "MediaPlayPause"
       ) {
         e.preventDefault();
-        capturePhoto();
+        handleStartCapture();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -138,6 +142,7 @@ export default function HomePage({ type }: { type: string }) {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+      <motion.div className={`z-100 w-full h-full fixed bg-white ${flash ? "visible" : "invisible"}`}></motion.div>
       <div className="bg-white rounded-3xl shadow-2xl p-8 flex flex-col items-center">
         <div className="relative">
           <video
