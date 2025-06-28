@@ -25,8 +25,8 @@ const PRIZE_TEXT: Record<Prize, string> = {
 const VERSION_TEXT = [
   "기본",
   "인스타",
-  "인스타+설문",
-  "인스타+설문+가입",
+  "인스타/설문",
+  "인스타/설문/가입",
 ];
 
 const getRandomPrize = (modifier: number = 1): Prize => {
