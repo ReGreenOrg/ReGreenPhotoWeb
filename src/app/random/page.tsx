@@ -120,7 +120,7 @@ const RandomPage = () => {
       <motion.div className={"absolute -z-0 w-[100vw] h-[100vh]"}>
         <Aurora colorStops={["#4b4c1e", "#233a56", "#bd63ed"]} />
       </motion.div>
-      <motion.div className={"absolute z-10 h-[100vh] w-[100vw]"}>
+      <motion.div className={"absolute  z-10 h-[100vh] w-[100vw]"}>
         <Ballpit_t
           key={isAnimating ? "anotherballpit" : ""}
           count={30}
@@ -133,7 +133,7 @@ const RandomPage = () => {
           minSize={1.2}
           colors={["#ed5a8e", "#e2145c", "#bd63ed"]}
           lightIntensity={0}
-          className={"z-10 h-[100vh] w-[100vw] "}
+          className={"z-10 h-[100vh] w-[100vw]  "}
         />
       </motion.div>
       {
