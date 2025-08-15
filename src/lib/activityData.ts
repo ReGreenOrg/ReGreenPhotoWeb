@@ -23,7 +23,7 @@ export const DATA: data = {
       "id": "activity-2",
       "title": "유튜브 게시물 1개에 좋은 댓글 달기",
       "imageSrc": "/activity/activity-2",
-      "activityButtonTitle": "유튜브 보러 가기",
+      "activityButtonTitle": "유튜브 보기",
       "url": "https://www.youtube.com"
     },
     {
@@ -44,35 +44,35 @@ export const DATA: data = {
       "id": "activity-5",
       "title": "집에서 거울 보고 춤추기",
       "imageSrc": "/activity/activity-5",
-      "activityButtonTitle": "춤추기 시작",
+      "activityButtonTitle": "음악 틀기",
       "url": "https://www.youtube.com/results?search_query=댄스+음악"
     },
     {
       "id": "activity-6",
       "title": "카톡 프로필에 오늘 기분 이모지 추가",
       "imageSrc": "/activity/activity-6",
-      "activityButtonTitle": "이모지 추가하기",
+      "activityButtonTitle": "카카오톡 열기",
       "url": "kakaotalk://"
     },
     {
       "id": "activity-7",
       "title": "커뮤니티에 인사 남기기 ('오늘도 파이팅~')",
       "imageSrc": "/activity/activity-7",
-      "activityButtonTitle": "인사하기",
+      "activityButtonTitle": "커뮤니티로 이동",
       "url": "https://cafe.naver.com"
     },
     {
       "id": "activity-8",
       "title": "재밌는 영상 1개 친구나 커뮤니티에 공유",
       "imageSrc": "/activity/activity-8",
-      "activityButtonTitle": "영상 공유하기",
+      "activityButtonTitle": "공유할 영상 찾기",
       "url": "https://www.youtube.com/feed/trending"
     },
     {
       "id": "activity-9",
       "title": "'3초간 허밍하기' (녹음 없이 그냥 클릭)",
       "imageSrc": "/activity/activity-9",
-      "activityButtonTitle": "허밍하기",
+      "activityButtonTitle": "허밍을 모른다면?",
       "url": "https://www.google.com/search?q=허밍"
     },
     {
@@ -100,14 +100,14 @@ export const DATA: data = {
       "id": "activity-13",
       "title": "날씨 이야기로 대화 시작하기 ('오늘 하늘 미쳤네')",
       "imageSrc": "/activity/activity-13",
-      "activityButtonTitle": "날씨 이야기 시작",
+      "activityButtonTitle": "날씨 찾아보기",
       "url": "https://www.weather.com"
     },
     {
       "id": "activity-14",
       "title": "이모지 3개로 대화 시작하기",
       "imageSrc": "/activity/activity-14",
-      "activityButtonTitle": "랜덤 이모지 3개 복사하기",
+      "activityButtonTitle": "랜덤 이모지 받기",
       "url": "https://emojipedia.org/random"
     }
   ]
