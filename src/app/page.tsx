@@ -70,6 +70,7 @@ const RandomPage = () => {
     const guid = uuidv4();
     if (!window.localStorage.getItem("uid")) {
       window.localStorage.setItem("uid", guid);
+      window.localStorage.setItem("actioned", "0");
     }
   }, []);
 
@@ -291,6 +292,7 @@ const RandomPage = () => {
                   onClick={() => {
                     // TODO: 했어요를 눌렀을 때 로직. 서버에 uid와 함께 전송.
                     window.localStorage.setItem("complete", "1");
+                    window.localStorage.setItem("actioned", (Number(window.localStorage.getItem("actioned")) + 1).toString());
                     setIsComplete(1);
                   }}
                   className={
