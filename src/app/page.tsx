@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import {
+import React, {
   useEffect,
   useState,
   // useEffect
@@ -21,6 +21,7 @@ number => {
 };
 
 const RandomPage = () => {
+  const today = new Date();
   const [isNowCancel, setIsNowCancel] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -28,9 +29,23 @@ const RandomPage = () => {
   const [resultData, setResultData] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("todaySelection");
-      if (saved) return saved;
+      const lastDate = localStorage.getItem("lastDate");
+      const savedMonth = Number(lastDate ? lastDate!.split(".")[0] : 0);
+      const savedDay = Number(lastDate ? lastDate!.split(".")[1] : 0);
+      if (!lastDate) return "";
+      if (saved && (new Date(2025, savedMonth - 1, savedDay)).getTime() === (new Date(2025, today.getMonth(), today.getDate())).getTime()) return saved;
     }
     return "";
+  });
+  const [isComplete, setIsComplete] = useState(() => {
+    if (typeof window !== "undefined") {
+      const complete = localStorage.getItem("complete");
+      if (complete == "1") {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
   });
 
   useEffect(() => {
@@ -38,9 +53,7 @@ const RandomPage = () => {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
     }
-
     setVh();
-
     window.addEventListener('resize', setVh);
   }, []);
 
@@ -69,11 +82,18 @@ const RandomPage = () => {
     setIsLoading(false);
   }, []);
 
+  useEffect(() => {
+
+  }, []);
+
   const handleDraw = () => {
     if (isAnimating) return;
     setIsAnimating(true);
 
-    if (window.localStorage.getItem("todaySelection")) {
+    const lastDate = localStorage.getItem("lastDate");
+    const savedMonth = Number(lastDate ? lastDate!.split(".")[0] : 0);
+    const savedDay = Number(lastDate ? lastDate!.split(".")[1] : 0);
+    if ((new Date(2025, savedMonth - 1, savedDay)).getTime() === (new Date(2025, today.getMonth(), today.getDate())).getTime()) {
       console.error("오늘 이미 행동을 뽑았습니다.");
       return;
     }
@@ -83,6 +103,8 @@ const RandomPage = () => {
       console.log(result);
       setResultData(result.toString());
       window.localStorage.setItem("todaySelection", result.toString());
+      window.localStorage.setItem("lastDate", Number(today.getMonth() + 1) + "." + today.getDate());
+      window.localStorage.setItem("complete", "0");
 
       setIsAnimating(false);
     }, 4000);
@@ -106,14 +128,55 @@ const RandomPage = () => {
         />
         <div className={"text-sm"}>당신의 하루를 재밌게 만들어 줄 미션을 만들고 있어요.</div>
     </div>
-    : <div className="h-screen-safe items-center justify-center text-center bg-gray-950">
+    : isComplete && resultData !== ""
+      ? <div className="w-[100vw] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl h-screen-safe p-10">
+          <motion.div className={"absolute -z-0 w-[100vw] h-screen-safe"}>
+            <Aurora colorStops={["#4b4c1e", "#233a56", "#bd63ed"]} />
+          </motion.div>
+          <div className={"z-10 flex flex-col items-center"}>
+            <img src={"festival.gif"} alt={"폭죽"} className={"w-full"} />
+            <GradientText
+              colors={["#f6b9d0", "#ffffff", "#d8acef"]}
+              animationSpeed={5}
+              showBorder={false}
+              className="custom-class"
+            >
+              <div className={"mt-20 px-10 text-2xl md:text-4xl font-black break-keep"}>오늘의 미션을 완료했어요!</div>
+            </GradientText>
+            <div className={"text-sm mb-20 mt-5"}>내일은 더 재밌는 미션이 준비되어 있어요.</div>
+            <GameButton onClick={async () => {
+              if (navigator.share) {
+                try {
+                  await navigator.share({
+                    title: "MURMUR에서 하루 미션 받기",
+                    text: "답답했던 하루를 MURMUR가 환기시켜 줄게요!",
+                    url: window.location.href,
+                  });
+                  console.log("공유 성공!");
+                } catch (err) {
+                  console.error("공유 취소/실패:", err);
+                }
+              } else {
+                alert("이 브라우저는 공유하기를 지원하지 않습니다.");
+              }
+            }} className={"w-full md:w-72"}>
+              <div className={"w-full bg-white py-4 rounded-full text-black text-lg"}>친구에게 오늘의 미션 추천하기</div>
+            </GameButton>
+            <GameButton onClick={() => {
+              window.history.back();
+            }} className={"w-full md:w-72 mt-5"}>
+              <div className={"w-full bg-gray-800 py-4 rounded-full text-white text-lg"}>닫기</div>
+            </GameButton>
+          </div>
+        </div>
+      : <div className="h-screen-safe items-center justify-center text-center bg-gray-950">
       <motion.div className={"absolute -z-0 w-[100vw] h-screen-safe"}>
         <Aurora colorStops={["#4b4c1e", "#233a56", "#bd63ed"]} />
       </motion.div>
       <motion.div className={"h-screen-safe absolute z-10 w-[100vw]"}>
         <Ballpit_t
           key={isAnimating ? "anotherballpit" : ""}
-          count={30}
+          count={20}
           gravity={isAnimating ? 0 : 0.5}
           friction={isAnimating ? 2 : 1}
           wallBounce={0.95}
@@ -180,12 +243,15 @@ const RandomPage = () => {
             </GradientText>
           </motion.div>
         ) : resultData === "" ? (
-          <CircularGameButton
-            className="w-32 h-32 md:w-64 md:h-64 rounded-full font-extrabold text-3xl md:text-5xl border-gray-300 bg-gray-100 hover:bg-gray-100 transition"
-            onClick={() => handleDraw()}
-          >
-            뽑기
-          </CircularGameButton>
+          <div className={""}>
+            <h1 className="text-white font-semibold text-3xl md:text-5xl mb-20">오늘의 미션을 뽑아볼까요!</h1>
+            <CircularGameButton
+              className="w-32 h-32 md:w-64 md:h-64 rounded-full font-extrabold text-3xl md:text-5xl border-gray-300 bg-gray-100 hover:bg-gray-100 transition"
+              onClick={() => handleDraw()}
+            >
+              뽑기
+            </CircularGameButton>
+          </div>
         ) : (
           <div className="flex gap-5 md:gap-7 flex-col">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="flex gap-3 justify-center">
@@ -197,7 +263,7 @@ const RandomPage = () => {
                     window.localStorage.setItem("actionButtonClicked", "1");
                   }}
                   className={
-                    `flex items-center gap-2 backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 py-3 md:py-7 md:px-7 md:text-2xl ${isActionButtonClicked ? "text-white bg-white/10" : "text-black bg-white"} border-2 rounded-full`
+                    `flex justify-center items-center gap-2 backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 py-3 md:py-7 md:px-7 md:text-2xl ${isActionButtonClicked ? "text-white bg-white/10" : "text-black bg-white"} border-2 rounded-full`
                   }
                 >
                   {
@@ -222,6 +288,8 @@ const RandomPage = () => {
                 ? <GameButton
                   onClick={() => {
                     // TODO: 했어요를 눌렀을 때 로직. 서버에 uid와 함께 전송.
+                    window.localStorage.setItem("complete", "1");
+                    setIsComplete(1);
                   }}
                   className={
                     "justify-center backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 md:px-7 py-3 md:py-7 md:text-2xl text-black border-2 border-white/20 bg-white rounded-full flex gap-1 items-center"
