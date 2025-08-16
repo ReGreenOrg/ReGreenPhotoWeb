@@ -98,13 +98,15 @@ const RandomPage = () => {
       return;
     }
 
+    window.localStorage.setItem("complete", "0");
+    setIsComplete(0);
+
     setTimeout(() => {
       const result = getRandomPrize();
       console.log(result);
       setResultData(result.toString());
       window.localStorage.setItem("todaySelection", result.toString());
       window.localStorage.setItem("lastDate", Number(today.getMonth() + 1) + "." + today.getDate());
-      window.localStorage.setItem("complete", "0");
 
       setIsAnimating(false);
     }, 4000);
@@ -128,7 +130,7 @@ const RandomPage = () => {
         />
         <div className={"text-sm"}>당신의 하루를 재밌게 만들어 줄 미션을 만들고 있어요.</div>
     </div>
-    : isComplete && resultData !== ""
+    : isComplete === 1 && resultData !== ""
       ? <div className="w-[100vw] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl h-screen-safe p-10">
           <motion.div className={"absolute -z-0 w-[100vw] h-screen-safe"}>
             <Aurora colorStops={["#4b4c1e", "#233a56", "#bd63ed"]} />
