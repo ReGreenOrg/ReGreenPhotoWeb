@@ -13,7 +13,7 @@ export function GameButton(props: GameButtonProps) {
     <motion.button
       onClick={() => props.onClick()}
       className={
-        props.className + " duration-100 ease-out " + (isPressed ? "translate-y-3 scale-y-95" : "")
+        props.className + " duration-100 ease-out " + (isPressed ? "translate-y-2 scale-y-95" : "")
       }
       onMouseDown={() => setIsPressed(true)}
       onMouseUp={() => setIsPressed(false)}

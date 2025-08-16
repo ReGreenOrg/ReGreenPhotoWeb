@@ -37,6 +37,12 @@ body {
   overflow: hidden;
 }
 
+@layer utilities {
+  .h-screen-safe {
+    height: calc(var(--vh, 1vh) * 100);
+  }
+}
+
 button {
   font-family: var(--font-sans);
   border: none;

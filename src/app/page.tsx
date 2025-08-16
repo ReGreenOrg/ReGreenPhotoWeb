@@ -13,6 +13,7 @@ import GradientText from "@/ui/GradientText";
 import { GameButton } from "@/ui/GameButton";
 import { CircularGameButton } from "@/ui/CircularGameButton";
 import {DATA} from "@/lib/activityData";
+import SplitText from "@/ui/SplitText";
 
 const getRandomPrize = (): // modifier: number = 1
 number => {
@@ -31,6 +32,17 @@ const RandomPage = () => {
     }
     return "";
   });
+
+  useEffect(() => {
+    function setVh() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+
+    setVh();
+
+    window.addEventListener('resize', setVh);
+  }, []);
 
   useEffect(() => {
     function uuidv4(): string {
@@ -68,10 +80,6 @@ const RandomPage = () => {
 
     setTimeout(() => {
       const result = getRandomPrize();
-      // saveToLocalStorage(result);
-      // id: "activity-1",
-      // title: "친구·가족에게 '잘 지내?' 한 줄 보내기",
-      // imageSrc: "activity/activity-1",
       console.log(result);
       setResultData(result.toString());
       window.localStorage.setItem("todaySelection", result.toString());
@@ -82,15 +90,27 @@ const RandomPage = () => {
 
   return (
     isLoading
-    ? <div className="w-[100vw] flex flex-col items-center justify-center h-[100vh] text-center bg-gray-950 text-white text-2xl">
-        <div>조금만 기다려주세요!</div>
+    ? <div className="w-[100vw] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl h-screen-safe">
+        <SplitText
+          text="조금만 기다려주세요!"
+          className="text-2xl font-semibold text-center"
+          delay={100}
+          duration={0.6}
+          ease="power3.out"
+          splitType="chars"
+          from={{ opacity: 0, y: 40 }}
+          to={{ opacity: 1, y: 0 }}
+          threshold={0.1}
+          rootMargin="-100px"
+          textAlign="center"
+        />
         <div className={"text-sm"}>당신의 하루를 재밌게 만들어 줄 미션을 만들고 있어요.</div>
     </div>
-    : <div className="items-center justify-center h-[100vh] text-center bg-gray-950">
-      <motion.div className={"absolute -z-0 w-[100vw] h-[100vh]"}>
+    : <div className="h-screen-safe items-center justify-center text-center bg-gray-950">
+      <motion.div className={"absolute -z-0 w-[100vw] h-screen-safe"}>
         <Aurora colorStops={["#4b4c1e", "#233a56", "#bd63ed"]} />
       </motion.div>
-      <motion.div className={"absolute z-10 h-[100vh] w-[100vw]"}>
+      <motion.div className={"h-screen-safe absolute z-10 w-[100vw]"}>
         <Ballpit_t
           key={isAnimating ? "anotherballpit" : ""}
           count={30}
@@ -103,11 +123,11 @@ const RandomPage = () => {
           minSize={1.2}
           colors={["#ed5a8e", "#e2145c", "#bd63ed"]}
           lightIntensity={0}
-          className={"z-10 h-[100vh] w-[100vw]"}
+          className={"z-10 h-screen-safe w-[100vw]"}
         />
       </motion.div>
       <motion.div
-        className={`absolute top-0 w-[100vw] h-[100vh] z-20 flex flex-col items-center justify-center space-y-10 duration-200 ${
+        className={`absolute top-0 w-[100vw] h-screen-safe z-20 flex flex-col items-center justify-center space-y-10 duration-200 ${
           resultData !== "" ? "backdrop-blur-3xl" : ""
         }`}
       >
@@ -116,9 +136,9 @@ const RandomPage = () => {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-6xl font-black text-gray-50 flex items-center flex-col space-y-10"
+            className="text-6xl text-gray-50 flex items-center flex-col space-y-10"
           >
-            <div className="relative w-60 h-60 md:w-120 md:h-120 flex flex-col items-center">
+            <div className="relative w-60 h-60 md:w-90 md:h-90 flex flex-col items-center">
               <Image
                 src={DATA.activities[Number(resultData)].imageSrc + ".png"}
                 alt="추첨 이미지"
@@ -127,12 +147,12 @@ const RandomPage = () => {
               />
             </div>
             <GradientText
-              colors={["#ed5a8e", "#ffffff", "#bd63ed"]}
+              colors={["#f6b9d0", "#ffffff", "#d8acef"]}
               animationSpeed={5}
               showBorder={false}
               className="custom-class"
             >
-              <div className={"text-2xl md:text-7xl font-black"}>{DATA.activities[Number(resultData)].title}</div>
+              <div className={"px-10 text-2xl md:text-4xl font-black break-keep"}>{DATA.activities[Number(resultData)].title}</div>
             </GradientText>
           </motion.div>
         ) : null}
@@ -169,16 +189,6 @@ const RandomPage = () => {
         ) : (
           <div className="flex gap-5 md:gap-7 flex-col">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="flex gap-3 justify-center">
-              <GameButton
-                onClick={() => {
-                  setIsNowCancel(true);
-                }}
-                className={
-                  "backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-5 py-5 md:py-10 md:px-10 font-bold text-lg md:text-3xl text-white border-2 border-white/20 bg-white/10 rounded-full"
-                }
-              >
-                오늘은 안할래요
-              </GameButton>
               <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="">
                 <GameButton
                   onClick={() => {
@@ -187,12 +197,12 @@ const RandomPage = () => {
                     window.localStorage.setItem("actionButtonClicked", "1");
                   }}
                   className={
-                    "flex items-center gap-2 backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-5 py-5 md:py-10 md:px-10 font-bold text-lg md:text-3xl text-white border-2 border-white/20 bg-white/10 rounded-full"
+                    `flex items-center gap-2 backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 py-3 md:py-7 md:px-7 md:text-2xl ${isActionButtonClicked ? "text-white bg-white/10" : "text-black bg-white"} border-2 rounded-full`
                   }
                 >
                   {
                     isActionButtonClicked
-                      ? <div className="relative w-5 h-5 md:w-7 md:h-7 flex flex-col items-center">
+                      ? <div className="relative w-3 h-3 md:w-5 md:h-5 flex flex-col items-center">
                         <Image
                           src={"arrow-up-right.svg"}
                           alt="check"
@@ -203,7 +213,7 @@ const RandomPage = () => {
                       : <></>
                   }
 
-                  <span>{DATA.activities[Number(resultData)].activityButtonTitle}</span>
+                  <span className={"break-keep"}>{DATA.activities[Number(resultData)].activityButtonTitle}</span>
                 </GameButton>
               </motion.div>
             </motion.div>
@@ -214,10 +224,10 @@ const RandomPage = () => {
                     // TODO: 했어요를 눌렀을 때 로직. 서버에 uid와 함께 전송.
                   }}
                   className={
-                    "justify-center backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-5 md:px-10 py-5 md:py-10 font-bold text-lg md:text-3xl text-black border-2 border-white/20 bg-white rounded-full flex gap-1 items-center"
+                    "justify-center backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 md:px-7 py-3 md:py-7 md:text-2xl text-black border-2 border-white/20 bg-white rounded-full flex gap-1 items-center"
                   }
                 >
-                  <div className="relative w-5 h-5 md:w-10 md:h-10 flex flex-col items-center">
+                  <div className="relative w-5 h-5 md:w-7 md:h-7 flex flex-col items-center">
                     <Image
                       src={"check-badge.svg"}
                       alt="check"
@@ -225,47 +235,67 @@ const RandomPage = () => {
                       className="object-contain rounded-[32px] z-0"
                     />
                   </div>
-                  <span>했어요</span>
+                  <span>완료했어요</span>
                 </GameButton>
                 : <></>
             }
+            <GameButton
+              onClick={() => {
+                setIsNowCancel(true);
+              }}
+              className={
+                "backdrop-contrast-200 backdrop-saturate-150 mt-10 min-w-30 px-3 py-3 md:py-7 md:px-7 md:text-2xl text-white/50 border-2 border-white/20 rounded-full"
+              }
+            >
+              오늘은 안할래요
+            </GameButton>
           </div>
         )}
+      </motion.div>
         {
-          isNowCancel ? <motion.div
-              className={"fixed flex items-center justify-center w-[100vw] h-[100vh] bg-black/50 z-10"}>
-            <motion.div
-              initial={{
-                scale: 0,
-                opacity: 0
-              }}
-              animate={{
-                scale: 1,
-                opacity: 1
-              }}
-              className={"rounded-xl bg-white w-fit px-10 py-10 mx-5"}>
-              <div className={"text-2xl font-bold mb-5"}>정말 안하실건가요?</div>
-              <div className={""}>페이지를 나가도 오늘 안에 다시 도전할 수 있어요!</div>
-              <div className={"flex gap-5 mt-10"}>
-                <GameButton onClick={() => {
-                  // TODO: 서버에 저장.
-                  window.history.back();
-                }} className={"w-full"}>
-                  <div className={"w-full bg-red-100 py-5 rounded-full text-red-800"}>오늘은 안할래요</div>
-                </GameButton>
-                <GameButton onClick={() => {
-                  setIsNowCancel(false);
-                }} className={"w-full"}>
-                  <div className={"w-full bg-gray-200 py-5 rounded-full"}>계속 할래요</div>
-                </GameButton>
-              </div>
+          isNowCancel
+          ? <motion.div
+              className={"fixed flex items-center justify-center w-[100vw] h-screen-safe top-0 bg-black/50 z-20"}>
+              <Overlay setIsNowCancel={setIsNowCancel} /> : <></>
             </motion.div>
-          </motion.div>
           : <></>
         }
-      </motion.div>
+
     </div>
   );
 };
 
 export default RandomPage;
+
+type overlay = {
+  setIsNowCancel: (x:boolean)=>void;
+}
+
+const Overlay = ({ setIsNowCancel }: overlay) => {
+  return <motion.div
+          initial={{
+            scale: 0,
+            opacity: 0
+          }}
+          animate={{
+            scale: 1,
+            opacity: 1
+          }}
+          className={"rounded-xl bg-white w-fit px-10 py-10 mx-5"}>
+          <div className={"text-2xl font-bold mb-5"}>정말 안하실건가요?</div>
+          <div className={"break-keep"}>페이지를 나가도 오늘 안에 다시 도전할 수 있어요!</div>
+          <div className={"flex flex-col gap-5 mt-10"}>
+            <GameButton onClick={() => {
+              setIsNowCancel(false);
+            }} className={"w-full"}>
+              <div className={"w-full bg-gray-800 py-5 rounded-full text-white"}>계속 할래요</div>
+            </GameButton>
+            <GameButton onClick={() => {
+              // TODO: 서버에 저장.
+              window.history.back();
+            }} className={"w-full"}>
+              <div className={"w-full bg-transparent rounded-full text-gray-600"}>오늘은 안할래요</div>
+            </GameButton>
+          </div>
+        </motion.div>
+}
