@@ -13,13 +13,15 @@ export function CircularGameButton(props: CircularGameButtonProps) {
 
   return (
     <div className="flex flex-col justify-center items-center gap-14">
-      <h1 className="text-white font-semibold text-3xl md:text-5xl">오늘 뭐할래요?</h1>
       <motion.button
         onClick={() => props.onClick()}
         className={props.className + " duration-100 ease-out " + (isPressed ? "scale-90" : "")}
         onMouseDown={() => setIsPressed(true)}
         onMouseUp={() => setIsPressed(false)}
         onMouseLeave={() => setIsPressed(false)}
+        onTouchStart={() => setIsPressed(true)}
+        onTouchEnd={() => setIsPressed(false)}
+        onTouchCancel={() => setIsPressed(false)}
       >
         {/* 이 div가 절대 위치 자식의 기준점이 됩니다. */}
         <div className={"relative"}>
