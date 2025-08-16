@@ -20,6 +20,9 @@ export function CircularGameButton(props: CircularGameButtonProps) {
         onMouseDown={() => setIsPressed(true)}
         onMouseUp={() => setIsPressed(false)}
         onMouseLeave={() => setIsPressed(false)}
+        onTouchStart={() => setIsPressed(true)}
+        onTouchEnd={() => setIsPressed(false)}
+        onTouchCancel={() => setIsPressed(false)}
       >
         {/* 이 div가 절대 위치 자식의 기준점이 됩니다. */}
         <div className={"relative"}>
