@@ -2,19 +2,15 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import React, {
-  useEffect,
-  useState,
-  // useEffect
-} from "react";
+import React, { useEffect, useState } from "react";
 import Aurora from "@/ui/Aurora";
 import Ballpit_t from "@/ui/Ballpit_t";
 import GradientText from "@/ui/GradientText";
 import { GameButton } from "@/ui/GameButton";
 import { CircularGameButton } from "@/ui/CircularGameButton";
-import {DATA} from "@/lib/activityData";
+import { DATA } from "@/lib/activityData";
 import SplitText from "@/ui/SplitText";
-import {db} from "@/app/api/firebase/firebase-sdk";
+import { db } from "@/app/api/firebase/firebase-sdk";
 import {
   arrayRemove,
   arrayUnion,
@@ -22,7 +18,7 @@ import {
   getDoc,
   increment,
   setDoc,
-  updateDoc
+  updateDoc,
 } from "@firebase/firestore";
 
 const getRandomPrize = (): // modifier: number = 1
@@ -33,28 +29,28 @@ number => {
 const getUserData = async (uid: string) => {
   const snapshot = await getDoc(doc(db, "pretotype-1", uid));
   return snapshot.data();
-}
+};
 
 const RandomPage = () => {
   const today = new Date();
   const [isNowCancel, setIsNowCancel] = useState(false);
 
   const [userId, setUserId] = useState<string>("");
-  const [userActioned, setUserActioned] = useState([]);
+  // const [setUserActioned] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isActionButtonClicked, setIsActionButtonClicked] = useState(false);
   const [resultData, setResultData] = useState("");
 
-  const [cycle, setCycle] = useState<2|1|0>(0);
+  const [cycle, setCycle] = useState<2 | 1 | 0>(0);
 
   useEffect(() => {
     function setVh() {
       const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
+      document.documentElement.style.setProperty("--vh", `${vh}px`);
     }
     setVh();
-    window.addEventListener('resize', setVh);
+    window.addEventListener("resize", setVh);
   }, []);
 
   useEffect(() => {
@@ -62,18 +58,17 @@ const RandomPage = () => {
     function uuidv4(): string {
       return ([1e7] + "-1e3-4e3-8e3-1e11").replace(/[018]/g, (c) => {
         const random = crypto.getRandomValues(new Uint8Array(1))[0];
-        return (
-          (+c ^ (random & (15 >> (+c / 4)))).toString(16)
-        );
+        return (+c ^ (random & (15 >> (+c / 4)))).toString(16);
       });
     }
 
-    const uid = window.localStorage.getItem("uid")
+    const uid = window.localStorage.getItem("uid");
 
-    ;(async () => {
+    (async () => {
       let realId = "";
-      console.log("uid 발급 중")
-      if (!uid) { // localStorage UID가 발급되지 않았으면, 최초 사용자로 인식하고 새로운 UID 발급 후 Server에 등록.
+      console.log("uid 발급 중");
+      if (!uid) {
+        // localStorage UID가 발급되지 않았으면, 최초 사용자로 인식하고 새로운 UID 발급 후 Server에 등록.
         const guid = uuidv4();
         window.localStorage.setItem("uid", guid);
         await addUser(serverTime, guid);
@@ -81,25 +76,30 @@ const RandomPage = () => {
         if (userData) {
           setUserId(guid);
           realId = guid;
-          setUserActioned(userData.actioned);
+          // setUserActioned(userData.actioned);
         }
       } else {
         const serverData = await getUserData(uid);
-        if (!serverData) { // localStorage UID가 Server에 존재하지 않으면 비정상적인 UID로 판별.
+        if (!serverData) {
+          // localStorage UID가 Server에 존재하지 않으면 비정상적인 UID로 판별.
           const guid = uuidv4();
-          console.error("비정상적인 사용자 ID입니다. 기존 데이터는 초기화하고 새로 발급합니다.", guid);
+          console.error(
+            "비정상적인 사용자 ID입니다. 기존 데이터는 초기화하고 새로 발급합니다.",
+            guid
+          );
           window.localStorage.setItem("uid", guid);
           await addUser(serverTime, guid);
           const userData = await getUserData(guid);
           if (userData) {
             setUserId(guid);
             realId = guid;
-            setUserActioned(userData.actioned);
+            // setUserActioned(userData.actioned);
           }
-        } else { // localStorage UID가 Server에 있으면 정상적인 UID로 판별.
+        } else {
+          // localStorage UID가 Server에 있으면 정상적인 UID로 판별.
           setUserId(uid);
           realId = uid;
-          setUserActioned(serverData.actioned);
+          // setUserActioned(serverData.actioned);
         }
       }
       console.log("uid 발급 완료: ", realId);
@@ -120,73 +120,75 @@ const RandomPage = () => {
 
       setIsLoading(false);
     })();
-
   }, []);
 
   const serverTime = new Date();
 
   const addUser = async (serverTime: Date, uid: string) => {
-    console.log("addUser", serverTime)
+    console.log("addUser", serverTime);
     try {
       await setDoc(doc(db, "pretotype-1", uid), {
         createdAt: new Date(),
         actioned: [],
-        share: 0
+        share: 0,
       });
       console.log("사용자 등록 성공!", uid);
     } catch (error) {
       console.error("사용자 등록 실패!", error);
     }
-  }
+  };
 
   const completeToday = async () => {
     try {
       const todayData = await getTodayActioned(userId);
       console.log(todayData);
       if (todayData.length >= 1) {
-        await updateAction(userId, "완료", serverTime)
+        await updateAction(userId, "완료", serverTime);
       } else {
         console.error("뽑기를 먼저 해야 합니다.");
       }
     } catch (error) {
       console.error("행동 완료를 전송하지 못했어요.", error);
     }
-  }
+  };
 
   const addShare = async () => {
     try {
       const userRef = doc(db, "pretotype-1", userId);
 
       await updateDoc(userRef, {
-        share: increment(1)
+        share: increment(1),
       });
     } catch (err) {
       console.error("공유 횟수를 추가하지 못했어요.", err);
     }
-  }
+  };
 
   const updateUserActioned = async (uid: string) => {
     console.log("updateUserActioned", uid);
     const userData = await getUserData(uid);
     if (userData) {
       console.log("updateUserActioned: ", userData);
-      setUserActioned(userData.actioned);
+      // setUserActioned(userData.actioned);
     } else {
       console.error("userId가 설정되지 않았어요.", uid);
     }
-  }
+  };
 
   const getTodayActioned = async (uid: string): Promise<string[]> => {
     // await updateUserActioned(uid);
     const actioned = (await getUserData(uid))?.actioned;
     console.log("userActioned:", actioned);
-    return actioned.filter((a: string)=> {
+    return actioned.filter((a: string) => {
       const savedYear = Number(a.split("__")[0].split(".")[0]);
       const savedMonth = Number(a.split("__")[0].split(".")[1]);
       const savedDay = Number(a.split("__")[0].split(".")[2]);
-      return (new Date(savedYear, savedMonth - 1, savedDay)).getTime() === (new Date(today.getFullYear(), today.getMonth(), today.getDate())).getTime();
+      return (
+        new Date(savedYear, savedMonth - 1, savedDay).getTime() ===
+        new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()
+      );
     });
-  }
+  };
 
   const updateAction = async (uid: string, type: string, date: Date, action: string = "") => {
     try {
@@ -196,26 +198,45 @@ const RandomPage = () => {
 
       if (todayData.length >= 1) {
         await updateDoc(userRef, {
-          actioned: arrayRemove(todayData[0])
+          actioned: arrayRemove(todayData[0]),
         });
 
         await updateDoc(userRef, {
-          actioned: arrayUnion(date.getFullYear() + "." + Number(date.getMonth() + 1) + "." + date.getDate() + "__" + todayData[0].split("__")[1] + "__" + type)
-        })
+          actioned: arrayUnion(
+            date.getFullYear() +
+              "." +
+              Number(date.getMonth() + 1) +
+              "." +
+              date.getDate() +
+              "__" +
+              todayData[0].split("__")[1] +
+              "__" +
+              type
+          ),
+        });
       } else {
         if (action !== "") {
           await updateDoc(userRef, {
-            actioned: arrayUnion(date.getFullYear() + "." + Number(date.getMonth() + 1) + "." + date.getDate() + "__" + action + "__" + type)
-          })
+            actioned: arrayUnion(
+              date.getFullYear() +
+                "." +
+                Number(date.getMonth() + 1) +
+                "." +
+                date.getDate() +
+                "__" +
+                action +
+                "__" +
+                type
+            ),
+          });
         } else {
           console.error("값을 추가하려면 action을 전달하세요.");
         }
       }
-
     } catch (error) {
       console.error("값을 제대로 업데이트하지 못했습니다.", error);
     }
-  }
+  };
 
   const handleDraw = async () => {
     if (isAnimating) return;
@@ -230,7 +251,8 @@ const RandomPage = () => {
     // }
 
     const todayProgress = await getTodayActioned(userId);
-    if (todayProgress.length >= 1) { // 오늘 한 게 아무것도 없으면?
+    if (todayProgress.length >= 1) {
+      // 오늘 한 게 아무것도 없으면?
       console.error("오늘 이미 행동을 뽑았습니다.");
       setIsAnimating(false);
       return;
@@ -243,7 +265,7 @@ const RandomPage = () => {
       const result = getRandomPrize();
       console.log(result);
       setResultData(result.toString());
-      ;(async() => {
+      (async () => {
         try {
           console.log(userId);
           await updateAction(userId, "뽑기", serverTime, result.toString());
@@ -251,63 +273,73 @@ const RandomPage = () => {
         } catch (err) {
           console.error("뽑기 결과를 저장하는 중 문제가 생겼어요.", err);
         }
-      })()
+      })();
 
       setIsAnimating(false);
     }, 4000);
   };
 
-  return (
-    isLoading && !userId
-    ? <div className="w-[100vw] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl h-screen-safe">
-        <SplitText
-          text="조금만 기다려주세요!"
-          className="text-2xl font-semibold text-center"
-          delay={100}
-          duration={0.6}
-          ease="power3.out"
-          splitType="chars"
-          from={{ opacity: 0, y: 40 }}
-          to={{ opacity: 1, y: 0 }}
-          threshold={0.1}
-          rootMargin="-100px"
-          textAlign="center"
-        />
-        <div className={"text-sm"}>당신의 하루를 재밌게 만들어 줄 미션을 만들고 있어요.</div>
+  return isLoading && !userId ? (
+    <div className="w-[100vw] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl h-screen-safe">
+      <SplitText
+        text="조금만 기다려주세요!"
+        className="text-2xl font-semibold text-center"
+        delay={100}
+        duration={0.6}
+        ease="power3.out"
+        splitType="chars"
+        from={{ opacity: 0, y: 40 }}
+        to={{ opacity: 1, y: 0 }}
+        threshold={0.1}
+        rootMargin="-100px"
+        textAlign="center"
+      />
+      <div className={"text-sm"}>당신의 하루를 재밌게 만들어 줄 미션을 만들고 있어요.</div>
     </div>
-    : cycle === 2 && resultData !== ""
-      ? <div className="w-[100vw] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl h-screen-safe p-10">
-          <motion.div className={"absolute -z-0 w-[100vw] h-screen-safe"}>
-            <Aurora colorStops={["#4b4c1e", "#233a56", "#bd63ed"]} />
-          </motion.div>
-          <div className={"z-10 flex flex-col items-center"}>
-            <motion.div
-              initial={{ opacity: 0, filter: "blur(10px)" }}
-              animate={{ opacity: 1, filter: "blur(0px)" }}
-            ><img src={"festival.gif"} alt={"폭죽"} className={"w-full"} /></motion.div>
-            <motion.div
-              initial={{ opacity:0, y: 20, filter: "blur(10px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ delay: 0.05 }}
-            ><GradientText
-              colors={["#f6b9d0", "#ffffff", "#d8acef"]}
-              animationSpeed={5}
-              showBorder={false}
-              className="custom-class"
-            >
-              <div className={"mt-20 px-10 text-2xl md:text-4xl font-black break-keep"}>오늘의 미션을 완료했어요!</div>
-            </GradientText></motion.div>
-            <motion.div
-              initial={{ opacity:0, y: 20, filter: "blur(10px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ delay: 0.1 }}
-              className={"text-sm mb-20 mt-5"}>내일은 더 재밌는 미션이 준비되어 있어요.</motion.div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
-              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-              transition={{ delay: 0.15 }}
-              className={"w-full md:w-72 mt-5"}
-            ><GameButton onClick={async () => {
+  ) : cycle === 2 && resultData !== "" ? (
+    <div className="w-[100vw] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl h-screen-safe p-10">
+      <motion.div className={"absolute -z-0 w-[100vw] h-screen-safe"}>
+        <Aurora colorStops={["#4b4c1e", "#233a56", "#bd63ed"]} />
+      </motion.div>
+      <div className={"z-10 flex flex-col items-center"}>
+        <motion.div
+          initial={{ opacity: 0, filter: "blur(10px)" }}
+          animate={{ opacity: 1, filter: "blur(0px)" }}
+        >
+          <img src={"festival.gif"} alt={"폭죽"} className={"w-full"} />
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ delay: 0.05 }}
+        >
+          <GradientText
+            colors={["#f6b9d0", "#ffffff", "#d8acef"]}
+            animationSpeed={5}
+            showBorder={false}
+            className="custom-class"
+          >
+            <div className={"mt-20 px-10 text-2xl md:text-4xl font-black break-keep"}>
+              오늘의 미션을 완료했어요!
+            </div>
+          </GradientText>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ delay: 0.1 }}
+          className={"text-sm mb-20 mt-5"}
+        >
+          내일은 더 재밌는 미션이 준비되어 있어요.
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
+          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          transition={{ delay: 0.15 }}
+          className={"w-full md:w-72 mt-5"}
+        >
+          <GameButton
+            onClick={async () => {
               if (navigator.share) {
                 try {
                   await navigator.share({
@@ -323,32 +355,40 @@ const RandomPage = () => {
               } else {
                 alert("이 브라우저는 공유하기를 지원하지 않습니다.");
               }
-            }} className={"w-full md:w-72"}>
-              <div className={"w-full bg-white py-4 rounded-full text-black text-lg flex gap-2 items-center justify-center"}>
-                <div className="relative w-5 h-5 md:w-7 md:h-7 flex flex-col items-center">
-                  <Image
-                    src={"share.svg"}
-                    alt="share"
-                    fill
-                    className="object-contain z-0"
-                  />
-                </div>
-                친구에게 오늘의 미션 추천하기
+            }}
+            className={"w-full md:w-72"}
+          >
+            <div
+              className={
+                "w-full bg-white py-4 rounded-full text-black text-lg flex gap-2 items-center justify-center"
+              }
+            >
+              <div className="relative w-5 h-5 md:w-7 md:h-7 flex flex-col items-center">
+                <Image src={"share.svg"} alt="share" fill className="object-contain z-0" />
               </div>
-            </GameButton></motion.div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
-              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-              transition={{ delay: 0.2 }}
-              className={"w-full md:w-72 mt-5"}
-            ><GameButton onClick={() => {
+              친구에게 오늘의 미션 추천하기
+            </div>
+          </GameButton>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
+          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          transition={{ delay: 0.2 }}
+          className={"w-full md:w-72 mt-5"}
+        >
+          <GameButton
+            onClick={() => {
               window.history.back();
-            }} className={"w-full md:w-72"}>
-              <div className={"w-full bg-gray-800 py-4 rounded-full text-white text-lg"}>닫기</div>
-            </GameButton></motion.div>
-          </div>
-        </div>
-      : <div className="h-screen-safe items-center justify-center text-center bg-gray-950">
+            }}
+            className={"w-full md:w-72"}
+          >
+            <div className={"w-full bg-gray-800 py-4 rounded-full text-white text-lg"}>닫기</div>
+          </GameButton>
+        </motion.div>
+      </div>
+    </div>
+  ) : (
+    <div className="h-screen-safe items-center justify-center text-center bg-gray-950">
       <motion.div className={"absolute -z-0 w-[100vw] h-screen-safe"}>
         <Aurora colorStops={["#4b4c1e", "#233a56", "#bd63ed"]} />
       </motion.div>
@@ -375,14 +415,13 @@ const RandomPage = () => {
       >
         {" "}
         {resultData !== "" ? (
-          <motion.div
-            className="text-6xl text-gray-50 flex items-center flex-col space-y-10"
-          >
+          <motion.div className="text-6xl text-gray-50 flex items-center flex-col space-y-10">
             <motion.div
               initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               transition={{ duration: 0.3 }}
-              className="relative w-60 h-60 md:w-90 md:h-90 flex flex-col items-center">
+              className="relative w-60 h-60 md:w-90 md:h-90 flex flex-col items-center"
+            >
               <Image
                 src={DATA.activities[Number(resultData)].imageSrc + ".png"}
                 alt="추첨 이미지"
@@ -401,7 +440,9 @@ const RandomPage = () => {
                 showBorder={false}
                 className="custom-class"
               >
-                <div className={"px-10 text-2xl md:text-4xl font-black break-keep"}>{DATA.activities[Number(resultData)].title}</div>
+                <div className={"px-10 text-2xl md:text-4xl font-black break-keep"}>
+                  {DATA.activities[Number(resultData)].title}
+                </div>
               </GradientText>
             </motion.div>
           </motion.div>
@@ -431,7 +472,9 @@ const RandomPage = () => {
           </motion.div>
         ) : resultData === "" ? (
           <div className={""}>
-            <h1 className="text-white font-semibold text-3xl md:text-5xl mb-20">오늘의 미션을 뽑아볼까요!</h1>
+            <h1 className="text-white font-semibold text-3xl md:text-5xl mb-20">
+              오늘의 미션을 뽑아볼까요!
+            </h1>
             <CircularGameButton
               className="w-32 h-32 md:w-64 md:h-64 rounded-full font-extrabold text-3xl md:text-5xl border-gray-300 bg-gray-100 hover:bg-gray-100 transition"
               onClick={() => handleDraw()}
@@ -441,65 +484,76 @@ const RandomPage = () => {
           </div>
         ) : (
           <div className="flex gap-5 md:gap-7 flex-col">
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="flex gap-3 justify-center">
-              <motion.div initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }} animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }} transition={{
-                type: "spring",    // 스프링 애니메이션
-                stiffness: 100,    // 스프링 강도 (높을수록 빠르게 복원)
-                damping: 15,       // 감쇠 계수 (낮을수록 많이 튕김)
-                mass: 1,           // 질량 (크면 더 느리게, 묵직하게 움직임)
-                delay: 0.2         // 시작 지연
-              }} className="">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex gap-3 justify-center"
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                transition={{
+                  type: "spring", // 스프링 애니메이션
+                  stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+                  damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+                  mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+                  delay: 0.2, // 시작 지연
+                }}
+                className=""
+              >
                 <GameButton
                   onClick={async () => {
                     window.open(DATA.activities[Number(resultData)].url);
                     setIsActionButtonClicked(true);
                     await updateAction(userId, "행동버튼", serverTime);
                   }}
-                  className={
-                    `flex justify-center items-center gap-2 backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 py-3 md:py-7 md:px-7 md:text-2xl ${isActionButtonClicked ? "text-white bg-white/10" : "text-black bg-white"} border-2 rounded-full`
-                  }
+                  className={`flex justify-center items-center gap-2 backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 py-3 md:py-7 md:px-7 md:text-2xl ${
+                    isActionButtonClicked ? "text-white bg-white/10" : "text-black bg-white"
+                  } border-2 rounded-full`}
                 >
-                  {
-                    isActionButtonClicked
-                      ? <div className="relative w-3 h-3 md:w-5 md:h-5 flex flex-col items-center">
-                        <Image
-                          src={"arrow-up-right.svg"}
-                          alt="check"
-                          fill
-                          className="object-contain rounded-[32px] z-0"
-                        />
-                      </div>
-                      : <></>
-                  }
+                  {isActionButtonClicked ? (
+                    <div className="relative w-3 h-3 md:w-5 md:h-5 flex flex-col items-center">
+                      <Image
+                        src={"arrow-up-right.svg"}
+                        alt="check"
+                        fill
+                        className="object-contain rounded-[32px] z-0"
+                      />
+                    </div>
+                  ) : (
+                    <></>
+                  )}
 
-                  <span className={"break-keep"}>{DATA.activities[Number(resultData)].activityButtonTitle}</span>
+                  <span className={"break-keep"}>
+                    {DATA.activities[Number(resultData)].activityButtonTitle}
+                  </span>
                 </GameButton>
               </motion.div>
             </motion.div>
-            {
-              isActionButtonClicked
-                ? <GameButton
-                  onClick={async () => {
-                    // TODO: 했어요를 눌렀을 때 로직. 서버에 uid와 함께 전송.
-                    setCycle(2);
-                    await completeToday();
-                  }}
-                  className={
-                    "justify-center backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 md:px-7 py-3 md:py-7 md:text-2xl text-black border-2 border-white/20 bg-white rounded-full flex gap-1 items-center"
-                  }
-                >
-                  <div className="relative w-5 h-5 md:w-7 md:h-7 flex flex-col items-center">
-                    <Image
-                      src={"check-badge.svg"}
-                      alt="check"
-                      fill
-                      className="object-contain rounded-[32px] z-0"
-                    />
-                  </div>
-                  <span>완료했어요</span>
-                </GameButton>
-                : <></>
-            }
+            {isActionButtonClicked ? (
+              <GameButton
+                onClick={async () => {
+                  // TODO: 했어요를 눌렀을 때 로직. 서버에 uid와 함께 전송.
+                  setCycle(2);
+                  await completeToday();
+                }}
+                className={
+                  "justify-center backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 md:px-7 py-3 md:py-7 md:text-2xl text-black border-2 border-white/20 bg-white rounded-full flex gap-1 items-center"
+                }
+              >
+                <div className="relative w-5 h-5 md:w-7 md:h-7 flex flex-col items-center">
+                  <Image
+                    src={"check-badge.svg"}
+                    alt="check"
+                    fill
+                    className="object-contain rounded-[32px] z-0"
+                  />
+                </div>
+                <span>완료했어요</span>
+              </GameButton>
+            ) : (
+              <></>
+            )}
             <motion.div
               initial={{ opacity: 0, filter: "blur(10px)" }}
               animate={{ opacity: 1, filter: "blur(0px)" }}
@@ -519,15 +573,17 @@ const RandomPage = () => {
           </div>
         )}
       </motion.div>
-        {
-          isNowCancel
-          ? <motion.div
-              className={"fixed flex items-center justify-center w-[100vw] h-screen-safe top-0 bg-black/50 z-20"}>
-              <Overlay setIsNowCancel={setIsNowCancel} /> : <></>
-            </motion.div>
-          : <></>
-        }
-
+      {isNowCancel ? (
+        <motion.div
+          className={
+            "fixed flex items-center justify-center w-[100vw] h-screen-safe top-0 bg-black/50 z-20"
+          }
+        >
+          <Overlay setIsNowCancel={setIsNowCancel} /> : <></>
+        </motion.div>
+      ) : (
+        <></>
+      )}
     </div>
   );
 };
@@ -535,44 +591,64 @@ const RandomPage = () => {
 export default RandomPage;
 
 type overlay = {
-  setIsNowCancel: (x:boolean)=>void;
-}
+  setIsNowCancel: (x: boolean) => void;
+};
 
 const Overlay = ({ setIsNowCancel }: overlay) => {
-  return <motion.div
-          initial={{
-            scale: 0,
-            opacity: 0,
-            filter: "blur(10px)",
-          }}
-          animate={{
-            scale: 1,
-            opacity: 1,
-            filter: "blur(0px)",
-          }}
-          className={"rounded-xl bg-white w-fit px-10 py-10 mx-5"}>
-          <motion.div initial={{opacity:0}} animate={{opacity:1}} className={"text-2xl font-bold mb-5"}>정말 안하실건가요?</motion.div>
-          <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.1}} className={"break-keep"}>페이지를 나가도 오늘 안에 다시 도전할 수 있어요!</motion.div>
-          <div className={"flex flex-col gap-5 mt-10"}>
-            <motion.div
-              initial={{scale: 0}}
-              animate={{scale: 1}}
-              transition={{delay: 0.2}}
-            >
-              <GameButton onClick={() => {
-                setIsNowCancel(false);
-              }} className={"w-full"}>
-                <div className={"w-full bg-gray-800 py-5 rounded-full text-white"}>계속 할래요</div>
-              </GameButton>
-            </motion.div>
-            <motion.div initial={{scale:0}} animate={{scale: 1}} transition={{delay: 0.3}}>
-              <GameButton onClick={() => {
-                // TODO: 서버에 저장.
-                window.history.back();
-              }} className={"w-full"}>
-                <div className={"w-full bg-transparent rounded-full text-gray-600"}>오늘은 안할래요</div>
-              </GameButton>
-            </motion.div>
-          </div>
+  return (
+    <motion.div
+      initial={{
+        scale: 0,
+        opacity: 0,
+        filter: "blur(10px)",
+      }}
+      animate={{
+        scale: 1,
+        opacity: 1,
+        filter: "blur(0px)",
+      }}
+      className={"rounded-xl bg-white w-fit px-10 py-10 mx-5"}
+    >
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className={"text-2xl font-bold mb-5"}
+      >
+        정말 안하실건가요?
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
+        className={"break-keep"}
+      >
+        페이지를 나가도 오늘 안에 다시 도전할 수 있어요!
+      </motion.div>
+      <div className={"flex flex-col gap-5 mt-10"}>
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2 }}>
+          <GameButton
+            onClick={() => {
+              setIsNowCancel(false);
+            }}
+            className={"w-full"}
+          >
+            <div className={"w-full bg-gray-800 py-5 rounded-full text-white"}>계속 할래요</div>
+          </GameButton>
         </motion.div>
-}
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3 }}>
+          <GameButton
+            onClick={() => {
+              // TODO: 서버에 저장.
+              window.history.back();
+            }}
+            className={"w-full"}
+          >
+            <div className={"w-full bg-transparent rounded-full text-gray-600"}>
+              오늘은 안할래요
+            </div>
+          </GameButton>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+};
