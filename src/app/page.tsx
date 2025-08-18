@@ -83,10 +83,6 @@ const RandomPage = () => {
     setIsLoading(false);
   }, []);
 
-  useEffect(() => {
-
-  }, []);
-
   const handleDraw = () => {
     if (isAnimating) return;
     setIsAnimating(true);
@@ -100,6 +96,8 @@ const RandomPage = () => {
     }
 
     window.localStorage.setItem("complete", "0");
+    window.localStorage.setItem("actionButtonClicked", "0");
+    setIsActionButtonClicked(false);
     setIsComplete(0);
 
     setTimeout(() => {
@@ -137,22 +135,38 @@ const RandomPage = () => {
             <Aurora colorStops={["#4b4c1e", "#233a56", "#bd63ed"]} />
           </motion.div>
           <div className={"z-10 flex flex-col items-center"}>
-            <img src={"festival.gif"} alt={"폭죽"} className={"w-full"} />
-            <GradientText
+            <motion.div
+              initial={{ opacity: 0, filter: "blur(10px)" }}
+              animate={{ opacity: 1, filter: "blur(0px)" }}
+            ><img src={"festival.gif"} alt={"폭죽"} className={"w-full"} /></motion.div>
+            <motion.div
+              initial={{ opacity:0, y: 20, filter: "blur(10px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ delay: 0.05 }}
+            ><GradientText
               colors={["#f6b9d0", "#ffffff", "#d8acef"]}
               animationSpeed={5}
               showBorder={false}
               className="custom-class"
             >
               <div className={"mt-20 px-10 text-2xl md:text-4xl font-black break-keep"}>오늘의 미션을 완료했어요!</div>
-            </GradientText>
-            <div className={"text-sm mb-20 mt-5"}>내일은 더 재밌는 미션이 준비되어 있어요.</div>
-            <GameButton onClick={async () => {
+            </GradientText></motion.div>
+            <motion.div
+              initial={{ opacity:0, y: 20, filter: "blur(10px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ delay: 0.1 }}
+              className={"text-sm mb-20 mt-5"}>내일은 더 재밌는 미션이 준비되어 있어요.</motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              transition={{ delay: 0.15 }}
+              className={"w-full md:w-72 mt-5"}
+            ><GameButton onClick={async () => {
               if (navigator.share) {
                 try {
                   await navigator.share({
                     title: "MURMUR에서 하루 미션 받기",
-                    text: "답답했던 하루를 MURMUR가 환기시켜 줄게요!",
+                    text: "무기력한 일상을 하루 한 개 미션으로 떨쳐내볼까요?",
                     url: window.location.href,
                   });
                   console.log("공유 성공!");
@@ -163,13 +177,28 @@ const RandomPage = () => {
                 alert("이 브라우저는 공유하기를 지원하지 않습니다.");
               }
             }} className={"w-full md:w-72"}>
-              <div className={"w-full bg-white py-4 rounded-full text-black text-lg"}>친구에게 오늘의 미션 추천하기</div>
-            </GameButton>
-            <GameButton onClick={() => {
+              <div className={"w-full bg-white py-4 rounded-full text-black text-lg flex gap-2 items-center justify-center"}>
+                <div className="relative w-5 h-5 md:w-7 md:h-7 flex flex-col items-center">
+                  <Image
+                    src={"share.svg"}
+                    alt="share"
+                    fill
+                    className="object-contain z-0"
+                  />
+                </div>
+                친구에게 오늘의 미션 추천하기
+              </div>
+            </GameButton></motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              transition={{ delay: 0.2 }}
+              className={"w-full md:w-72 mt-5"}
+            ><GameButton onClick={() => {
               window.history.back();
-            }} className={"w-full md:w-72 mt-5"}>
+            }} className={"w-full md:w-72"}>
               <div className={"w-full bg-gray-800 py-4 rounded-full text-white text-lg"}>닫기</div>
-            </GameButton>
+            </GameButton></motion.div>
           </div>
         </div>
       : <div className="h-screen-safe items-center justify-center text-center bg-gray-950">
@@ -200,26 +229,34 @@ const RandomPage = () => {
         {" "}
         {resultData !== "" ? (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
             className="text-6xl text-gray-50 flex items-center flex-col space-y-10"
           >
-            <div className="relative w-60 h-60 md:w-90 md:h-90 flex flex-col items-center">
+            <motion.div
+              initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ duration: 0.3 }}
+              className="relative w-60 h-60 md:w-90 md:h-90 flex flex-col items-center">
               <Image
                 src={DATA.activities[Number(resultData)].imageSrc + ".png"}
                 alt="추첨 이미지"
                 fill
                 className="object-contain rounded-[32px] z-0"
               />
-            </div>
-            <GradientText
-              colors={["#f6b9d0", "#ffffff", "#d8acef"]}
-              animationSpeed={5}
-              showBorder={false}
-              className="custom-class"
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10, filter: "blur(10px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ delay: 0.1, duration: 0.3 }}
             >
-              <div className={"px-10 text-2xl md:text-4xl font-black break-keep"}>{DATA.activities[Number(resultData)].title}</div>
-            </GradientText>
+              <GradientText
+                colors={["#f6b9d0", "#ffffff", "#d8acef"]}
+                animationSpeed={5}
+                showBorder={false}
+                className="custom-class"
+              >
+                <div className={"px-10 text-2xl md:text-4xl font-black break-keep"}>{DATA.activities[Number(resultData)].title}</div>
+              </GradientText>
+            </motion.div>
           </motion.div>
         ) : null}
         {isAnimating ? (
@@ -258,7 +295,13 @@ const RandomPage = () => {
         ) : (
           <div className="flex gap-5 md:gap-7 flex-col">
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="flex gap-3 justify-center">
-              <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="">
+              <motion.div initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }} animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }} transition={{
+                type: "spring",    // 스프링 애니메이션
+                stiffness: 100,    // 스프링 강도 (높을수록 빠르게 복원)
+                damping: 15,       // 감쇠 계수 (낮을수록 많이 튕김)
+                mass: 1,           // 질량 (크면 더 느리게, 묵직하게 움직임)
+                delay: 0.2         // 시작 지연
+              }} className="">
                 <GameButton
                   onClick={() => {
                     window.open(DATA.activities[Number(resultData)].url);
@@ -311,16 +354,22 @@ const RandomPage = () => {
                 </GameButton>
                 : <></>
             }
-            <GameButton
-              onClick={() => {
-                setIsNowCancel(true);
-              }}
-              className={
-                "backdrop-contrast-200 backdrop-saturate-150 mt-10 min-w-30 px-3 py-3 md:py-7 md:px-7 md:text-2xl text-white/50 border-2 border-white/20 rounded-full"
-              }
+            <motion.div
+              initial={{ opacity: 0, filter: "blur(10px)" }}
+              animate={{ opacity: 1, filter: "blur(0px)" }}
+              transition={{ delay: 0.5, duration: 1 }}
             >
-              오늘은 안할래요
-            </GameButton>
+              <GameButton
+                onClick={() => {
+                  setIsNowCancel(true);
+                }}
+                className={
+                  "backdrop-contrast-200 backdrop-saturate-150 mt-10 min-w-30 px-3 py-3 md:py-7 md:px-7 md:text-2xl text-white/50 border-2 border-white/20 rounded-full"
+                }
+              >
+                오늘은 안할래요
+              </GameButton>
+            </motion.div>
           </div>
         )}
       </motion.div>
@@ -347,27 +396,37 @@ const Overlay = ({ setIsNowCancel }: overlay) => {
   return <motion.div
           initial={{
             scale: 0,
-            opacity: 0
+            opacity: 0,
+            filter: "blur(10px)",
           }}
           animate={{
             scale: 1,
-            opacity: 1
+            opacity: 1,
+            filter: "blur(0px)",
           }}
           className={"rounded-xl bg-white w-fit px-10 py-10 mx-5"}>
-          <div className={"text-2xl font-bold mb-5"}>정말 안하실건가요?</div>
-          <div className={"break-keep"}>페이지를 나가도 오늘 안에 다시 도전할 수 있어요!</div>
+          <motion.div initial={{opacity:0}} animate={{opacity:1}} className={"text-2xl font-bold mb-5"}>정말 안하실건가요?</motion.div>
+          <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.1}} className={"break-keep"}>페이지를 나가도 오늘 안에 다시 도전할 수 있어요!</motion.div>
           <div className={"flex flex-col gap-5 mt-10"}>
-            <GameButton onClick={() => {
-              setIsNowCancel(false);
-            }} className={"w-full"}>
-              <div className={"w-full bg-gray-800 py-5 rounded-full text-white"}>계속 할래요</div>
-            </GameButton>
-            <GameButton onClick={() => {
-              // TODO: 서버에 저장.
-              window.history.back();
-            }} className={"w-full"}>
-              <div className={"w-full bg-transparent rounded-full text-gray-600"}>오늘은 안할래요</div>
-            </GameButton>
+            <motion.div
+              initial={{scale: 0}}
+              animate={{scale: 1}}
+              transition={{delay: 0.2}}
+            >
+              <GameButton onClick={() => {
+                setIsNowCancel(false);
+              }} className={"w-full"}>
+                <div className={"w-full bg-gray-800 py-5 rounded-full text-white"}>계속 할래요</div>
+              </GameButton>
+            </motion.div>
+            <motion.div initial={{scale:0}} animate={{scale: 1}} transition={{delay: 0.3}}>
+              <GameButton onClick={() => {
+                // TODO: 서버에 저장.
+                window.history.back();
+              }} className={"w-full"}>
+                <div className={"w-full bg-transparent rounded-full text-gray-600"}>오늘은 안할래요</div>
+              </GameButton>
+            </motion.div>
           </div>
         </motion.div>
 }
