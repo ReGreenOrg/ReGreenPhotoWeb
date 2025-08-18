@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "우이미 인생네컷",
-  description: "우이미와 함께하는 인생네컷 촬영",
+  title: "MURMUR:하루 한 개 미션으로 무기력함 없애기",
+  description: "무기력한 일상을 하루 한 개 미션으로 바꾸기",
 };
 
 export default function RootLayout({
