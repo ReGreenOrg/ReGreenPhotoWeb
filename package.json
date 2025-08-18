@@ -11,6 +11,7 @@
   "dependencies": {
     "@google-cloud/storage": "^7.16.0",
     "@uploadthing/react": "^7.3.1",
+    "firebase": "^12.1.0",
     "framer-motion": "^12.12.2",
     "gsap": "^3.13.0",
     "html-to-image": "^1.11.13",

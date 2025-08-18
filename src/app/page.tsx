@@ -14,39 +14,39 @@ import { GameButton } from "@/ui/GameButton";
 import { CircularGameButton } from "@/ui/CircularGameButton";
 import {DATA} from "@/lib/activityData";
 import SplitText from "@/ui/SplitText";
+import {db} from "@/app/api/firebase/firebase-sdk";
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  getDoc,
+  increment,
+  setDoc,
+  updateDoc
+} from "@firebase/firestore";
 
 const getRandomPrize = (): // modifier: number = 1
 number => {
   return Math.floor(Math.random() * DATA.activities.length);
 };
 
+const getUserData = async (uid: string) => {
+  const snapshot = await getDoc(doc(db, "pretotype-1", uid));
+  return snapshot.data();
+}
+
 const RandomPage = () => {
   const today = new Date();
   const [isNowCancel, setIsNowCancel] = useState(false);
+
+  const [userId, setUserId] = useState<string>("");
+  const [userActioned, setUserActioned] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isActionButtonClicked, setIsActionButtonClicked] = useState(false);
-  const [resultData, setResultData] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("todaySelection");
-      const lastDate = localStorage.getItem("lastDate");
-      const savedMonth = Number(lastDate ? lastDate!.split(".")[0] : 0);
-      const savedDay = Number(lastDate ? lastDate!.split(".")[1] : 0);
-      if (!lastDate) return "";
-      if (saved && (new Date(2025, savedMonth - 1, savedDay)).getTime() === (new Date(2025, today.getMonth(), today.getDate())).getTime()) return saved;
-    }
-    return "";
-  });
-  const [isComplete, setIsComplete] = useState(() => {
-    if (typeof window !== "undefined") {
-      const complete = localStorage.getItem("complete");
-      if (complete == "1") {
-        return 1;
-      } else {
-        return 0;
-      }
-    }
-  });
+  const [resultData, setResultData] = useState("");
+
+  const [cycle, setCycle] = useState<2|1|0>(0);
 
   useEffect(() => {
     function setVh() {
@@ -58,6 +58,7 @@ const RandomPage = () => {
   }, []);
 
   useEffect(() => {
+    setIsLoading(true);
     function uuidv4(): string {
       return ([1e7] + "-1e3-4e3-8e3-1e11").replace(/[018]/g, (c) => {
         const random = crypto.getRandomValues(new Uint8Array(1))[0];
@@ -67,52 +68,197 @@ const RandomPage = () => {
       });
     }
 
-    const guid = uuidv4();
-    if (!window.localStorage.getItem("uid")) {
-      window.localStorage.setItem("uid", guid);
-      window.localStorage.setItem("actioned", "0");
-    }
+    const uid = window.localStorage.getItem("uid")
+
+    ;(async () => {
+      let realId = "";
+      console.log("uid 발급 중")
+      if (!uid) { // localStorage UID가 발급되지 않았으면, 최초 사용자로 인식하고 새로운 UID 발급 후 Server에 등록.
+        const guid = uuidv4();
+        window.localStorage.setItem("uid", guid);
+        await addUser(serverTime, guid);
+        const userData = await getUserData(guid);
+        if (userData) {
+          setUserId(guid);
+          realId = guid;
+          setUserActioned(userData.actioned);
+        }
+      } else {
+        const serverData = await getUserData(uid);
+        if (!serverData) { // localStorage UID가 Server에 존재하지 않으면 비정상적인 UID로 판별.
+          const guid = uuidv4();
+          console.error("비정상적인 사용자 ID입니다. 기존 데이터는 초기화하고 새로 발급합니다.", guid);
+          window.localStorage.setItem("uid", guid);
+          await addUser(serverTime, guid);
+          const userData = await getUserData(guid);
+          if (userData) {
+            setUserId(guid);
+            realId = guid;
+            setUserActioned(userData.actioned);
+          }
+        } else { // localStorage UID가 Server에 있으면 정상적인 UID로 판별.
+          setUserId(uid);
+          realId = uid;
+          setUserActioned(serverData.actioned);
+        }
+      }
+      console.log("uid 발급 완료: ", realId);
+
+      const todayData = await getTodayActioned(realId);
+      if (todayData.length >= 1) {
+        if (todayData[0].split("__")[2] === "완료") {
+          setCycle(2);
+        } else {
+          setCycle(1);
+        }
+        setResultData(todayData[0].split("__")[1]);
+      } else {
+        setCycle(0);
+        setResultData("");
+      }
+      console.log(todayData);
+
+      setIsLoading(false);
+    })();
+
   }, []);
 
-  useEffect(() => {
-    setIsLoading(true);
-    const actionButtonClicked = window.localStorage.getItem("actionButtonClicked");
-    if (actionButtonClicked == "1") {
-      setIsActionButtonClicked(true);
-    }
-    setIsLoading(false);
-  }, []);
+  const serverTime = new Date();
 
-  const handleDraw = () => {
+  const addUser = async (serverTime: Date, uid: string) => {
+    console.log("addUser", serverTime)
+    try {
+      await setDoc(doc(db, "pretotype-1", uid), {
+        createdAt: new Date(),
+        actioned: [],
+        share: 0
+      });
+      console.log("사용자 등록 성공!", uid);
+    } catch (error) {
+      console.error("사용자 등록 실패!", error);
+    }
+  }
+
+  const completeToday = async () => {
+    try {
+      const todayData = await getTodayActioned(userId);
+      console.log(todayData);
+      if (todayData.length >= 1) {
+        await updateAction(userId, "완료", serverTime)
+      } else {
+        console.error("뽑기를 먼저 해야 합니다.");
+      }
+    } catch (error) {
+      console.error("행동 완료를 전송하지 못했어요.", error);
+    }
+  }
+
+  const addShare = async () => {
+    try {
+      const userRef = doc(db, "pretotype-1", userId);
+
+      await updateDoc(userRef, {
+        share: increment(1)
+      });
+    } catch (err) {
+      console.error("공유 횟수를 추가하지 못했어요.", err);
+    }
+  }
+
+  const updateUserActioned = async (uid: string) => {
+    console.log("updateUserActioned", uid);
+    const userData = await getUserData(uid);
+    if (userData) {
+      console.log("updateUserActioned: ", userData);
+      setUserActioned(userData.actioned);
+    } else {
+      console.error("userId가 설정되지 않았어요.", uid);
+    }
+  }
+
+  const getTodayActioned = async (uid: string): Promise<string[]> => {
+    // await updateUserActioned(uid);
+    const actioned = (await getUserData(uid))?.actioned;
+    console.log("userActioned:", actioned);
+    return actioned.filter((a: string)=> {
+      const savedYear = Number(a.split("__")[0].split(".")[0]);
+      const savedMonth = Number(a.split("__")[0].split(".")[1]);
+      const savedDay = Number(a.split("__")[0].split(".")[2]);
+      return (new Date(savedYear, savedMonth - 1, savedDay)).getTime() === (new Date(today.getFullYear(), today.getMonth(), today.getDate())).getTime();
+    });
+  }
+
+  const updateAction = async (uid: string, type: string, date: Date, action: string = "") => {
+    try {
+      const userRef = doc(db, "pretotype-1", uid);
+
+      const todayData = await getTodayActioned(uid);
+
+      if (todayData.length >= 1) {
+        await updateDoc(userRef, {
+          actioned: arrayRemove(todayData[0])
+        });
+
+        await updateDoc(userRef, {
+          actioned: arrayUnion(date.getFullYear() + "." + Number(date.getMonth() + 1) + "." + date.getDate() + "__" + todayData[0].split("__")[1] + "__" + type)
+        })
+      } else {
+        if (action !== "") {
+          await updateDoc(userRef, {
+            actioned: arrayUnion(date.getFullYear() + "." + Number(date.getMonth() + 1) + "." + date.getDate() + "__" + action + "__" + type)
+          })
+        } else {
+          console.error("값을 추가하려면 action을 전달하세요.");
+        }
+      }
+
+    } catch (error) {
+      console.error("값을 제대로 업데이트하지 못했습니다.", error);
+    }
+  }
+
+  const handleDraw = async () => {
     if (isAnimating) return;
     setIsAnimating(true);
 
-    const lastDate = localStorage.getItem("lastDate");
-    const savedMonth = Number(lastDate ? lastDate!.split(".")[0] : 0);
-    const savedDay = Number(lastDate ? lastDate!.split(".")[1] : 0);
-    if ((new Date(2025, savedMonth - 1, savedDay)).getTime() === (new Date(2025, today.getMonth(), today.getDate())).getTime()) {
+    // const lastDate = localStorage.getItem("lastDate");
+    // const savedMonth = Number(lastDate ? lastDate!.split(".")[0] : 0);
+    // const savedDay = Number(lastDate ? lastDate!.split(".")[1] : 0);
+    // if ((new Date(2025, savedMonth - 1, savedDay)).getTime() === (new Date(2025, today.getMonth(), today.getDate())).getTime()) {
+    //   console.error("오늘 이미 행동을 뽑았습니다.");
+    //   return;
+    // }
+
+    const todayProgress = await getTodayActioned(userId);
+    if (todayProgress.length >= 1) { // 오늘 한 게 아무것도 없으면?
       console.error("오늘 이미 행동을 뽑았습니다.");
+      setIsAnimating(false);
       return;
     }
 
-    window.localStorage.setItem("complete", "0");
-    window.localStorage.setItem("actionButtonClicked", "0");
     setIsActionButtonClicked(false);
-    setIsComplete(0);
+    setCycle(0);
 
     setTimeout(() => {
       const result = getRandomPrize();
       console.log(result);
       setResultData(result.toString());
-      window.localStorage.setItem("todaySelection", result.toString());
-      window.localStorage.setItem("lastDate", Number(today.getMonth() + 1) + "." + today.getDate());
+      ;(async() => {
+        try {
+          console.log(userId);
+          await updateAction(userId, "뽑기", serverTime, result.toString());
+          await updateUserActioned(userId);
+        } catch (err) {
+          console.error("뽑기 결과를 저장하는 중 문제가 생겼어요.", err);
+        }
+      })()
 
       setIsAnimating(false);
     }, 4000);
   };
 
   return (
-    isLoading
+    isLoading && !userId
     ? <div className="w-[100vw] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl h-screen-safe">
         <SplitText
           text="조금만 기다려주세요!"
@@ -129,7 +275,7 @@ const RandomPage = () => {
         />
         <div className={"text-sm"}>당신의 하루를 재밌게 만들어 줄 미션을 만들고 있어요.</div>
     </div>
-    : isComplete === 1 && resultData !== ""
+    : cycle === 2 && resultData !== ""
       ? <div className="w-[100vw] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl h-screen-safe p-10">
           <motion.div className={"absolute -z-0 w-[100vw] h-screen-safe"}>
             <Aurora colorStops={["#4b4c1e", "#233a56", "#bd63ed"]} />
@@ -170,6 +316,7 @@ const RandomPage = () => {
                     url: window.location.href,
                   });
                   console.log("공유 성공!");
+                  await addShare();
                 } catch (err) {
                   console.error("공유 취소/실패:", err);
                 }
@@ -303,10 +450,10 @@ const RandomPage = () => {
                 delay: 0.2         // 시작 지연
               }} className="">
                 <GameButton
-                  onClick={() => {
+                  onClick={async () => {
                     window.open(DATA.activities[Number(resultData)].url);
                     setIsActionButtonClicked(true);
-                    window.localStorage.setItem("actionButtonClicked", "1");
+                    await updateAction(userId, "행동버튼", serverTime);
                   }}
                   className={
                     `flex justify-center items-center gap-2 backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 py-3 md:py-7 md:px-7 md:text-2xl ${isActionButtonClicked ? "text-white bg-white/10" : "text-black bg-white"} border-2 rounded-full`
@@ -332,11 +479,10 @@ const RandomPage = () => {
             {
               isActionButtonClicked
                 ? <GameButton
-                  onClick={() => {
+                  onClick={async () => {
                     // TODO: 했어요를 눌렀을 때 로직. 서버에 uid와 함께 전송.
-                    window.localStorage.setItem("complete", "1");
-                    window.localStorage.setItem("actioned", (Number(window.localStorage.getItem("actioned")) + 1).toString());
-                    setIsComplete(1);
+                    setCycle(2);
+                    await completeToday();
                   }}
                   className={
                     "justify-center backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 md:px-7 py-3 md:py-7 md:text-2xl text-black border-2 border-white/20 bg-white rounded-full flex gap-1 items-center"
