@@ -40,7 +40,7 @@ const RandomPage = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [resultData, setResultData] = useState("");
 
-  const [cycle, setCycle] = useState<2 | 1 | 0>(0);
+  const [cycle, setCycle] = useState<2 | 1 | 0 | -1>(-1);
 
   useEffect(() => {
     function setVh() {
@@ -111,10 +111,8 @@ const RandomPage = () => {
         setCycle(0);
         setResultData("");
       }
-      console.log(todayData);
-
-      setIsLoading(false);
     })();
+    setIsLoading(false);
   }, []);
 
   const serverTime = new Date();
@@ -251,7 +249,7 @@ const RandomPage = () => {
     }, 4000);
   };
 
-  return isLoading && !userId ? (
+  return isLoading || !userId || cycle === -1 ? (
     <div className="w-[100vw] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl h-screen-safe">
       <SplitText
         text="조금만 기다려주세요!"
@@ -381,182 +379,188 @@ const RandomPage = () => {
         />
       </motion.div>
       <motion.div
-        className={`absolute top-0 w-[100vw] h-screen-safe z-20 flex flex-col items-center justify-center space-y-10 duration-200 ${
+        className={`absolute top-0 w-[100vw] h-screen-safe z-20 duration-200 ${
           resultData !== "" ? "backdrop-blur-3xl" : ""
         }`}
       >
-        {" "}
-        {resultData !== "" ? (
-          <motion.div className="text-6xl text-gray-50 flex items-center flex-col space-y-10">
-            <motion.div
-              initial={{ opacity: 0, scale: 1.2, filter: "blur(10px)" }}
-              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-              transition={{ duration: 0.3 }}
-              className="relative w-60 h-60 md:w-90 md:h-90 flex flex-col items-center"
-            >
-              <Image
-                src={DATA.activities[Number(resultData)].imageSrc + ".png"}
-                alt="추첨 이미지"
-                fill
-                className="object-contain rounded-[32px] z-0 bg-white/10 backdrop-blur-3xl backdrop-contrast-200 backdrop-saturate-200"
-              />
+        <motion.div
+          className={`w-full h-full flex flex-col items-center justify-center space-y-10 duration-500 ${
+            isNowCancel ? "scale-90 blur-sm" : "scale-100"
+          }`}
+        >
+          {resultData !== "" ? (
+            <motion.div className="text-6xl text-gray-50 flex items-center flex-col space-y-10">
+              <motion.div
+                initial={{ opacity: 0, scale: 1.2, filter: "blur(10px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                transition={{ duration: 0.3 }}
+                className="relative w-60 h-60 md:w-90 md:h-90 flex flex-col items-center"
+              >
+                <Image
+                  src={DATA.activities[Number(resultData)].imageSrc + ".png"}
+                  alt="추첨 이미지"
+                  fill
+                  className="object-contain rounded-[32px] z-0 bg-white/10 backdrop-blur-3xl backdrop-contrast-200 backdrop-saturate-200"
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 1.2, filter: "blur(10px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                transition={{ delay: 0.1, duration: 0.3 }}
+              >
+                <GradientText
+                  colors={["#f6b9d0", "#ffffff", "#d8acef"]}
+                  animationSpeed={5}
+                  showBorder={false}
+                  className="custom-class"
+                >
+                  <div className={"px-10 text-2xl md:text-4xl font-black break-keep"}>
+                    {DATA.activities[Number(resultData)].title}
+                  </div>
+                </GradientText>
+              </motion.div>
             </motion.div>
+          ) : null}
+          {isAnimating ? (
             <motion.div
-              initial={{ opacity: 0, scale: 1.2, filter: "blur(10px)" }}
-              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-              transition={{ delay: 0.1, duration: 0.3 }}
+              className={
+                "absolute bottom-10 px-10 py-5 rounded-full bg-gray-900 border-2 border-gray-800 text-white font-bold text-3xl"
+              }
+              initial={{
+                y: 30,
+                opacity: 0,
+              }}
+              animate={{
+                y: 0,
+                opacity: 1,
+              }}
             >
               <GradientText
-                colors={["#f6b9d0", "#ffffff", "#d8acef"]}
+                colors={["#ed5a8e", "#ffffff", "#bd63ed"]}
                 animationSpeed={5}
                 showBorder={false}
                 className="custom-class"
               >
-                <div className={"px-10 text-2xl md:text-4xl font-black break-keep"}>
-                  {DATA.activities[Number(resultData)].title}
-                </div>
+                <div className={"text-xl md:text-3xl font-black"}>두근두근, 무엇이 나올까요?</div>
               </GradientText>
             </motion.div>
-          </motion.div>
-        ) : null}
-        {isAnimating ? (
-          <motion.div
-            className={
-              "absolute bottom-10 px-10 py-5 rounded-full bg-gray-900 border-2 border-gray-800 text-white font-bold text-3xl"
-            }
-            initial={{
-              y: 30,
-              opacity: 0,
-            }}
-            animate={{
-              y: 0,
-              opacity: 1,
-            }}
-          >
-            <GradientText
-              colors={["#ed5a8e", "#ffffff", "#bd63ed"]}
-              animationSpeed={5}
-              showBorder={false}
-              className="custom-class"
-            >
-              <div className={"text-xl md:text-3xl font-black"}>두근두근, 무엇이 나올까요?</div>
-            </GradientText>
-          </motion.div>
-        ) : resultData === "" ? (
-          <div className={""}>
-            <h1 className="text-white font-semibold text-3xl md:text-5xl mb-20">
-              오늘의 미션을 뽑아볼까요!
-            </h1>
-            <CircularGameButton
-              className="w-32 h-32 md:w-64 md:h-64 rounded-full font-extrabold text-3xl md:text-5xl border-gray-300 bg-gray-100 hover:bg-gray-100 transition"
-              onClick={() => handleDraw()}
-            >
-              뽑기
-            </CircularGameButton>
-          </div>
-        ) : (
-          <div className="flex gap-5 md:gap-7 flex-col items-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex gap-3 justify-center"
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
-                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                transition={{
-                  type: "spring", // 스프링 애니메이션
-                  stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
-                  damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
-                  mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
-                  delay: 0.2, // 시작 지연
-                }}
-                className=""
+          ) : resultData === "" ? (
+            <div className={""}>
+              <h1 className="text-white font-semibold text-3xl md:text-5xl mb-20">
+                오늘의 미션을 뽑아볼까요!
+              </h1>
+              <CircularGameButton
+                className="w-32 h-32 md:w-64 md:h-64 rounded-full font-extrabold text-3xl md:text-5xl border-gray-300 bg-gray-100 hover:bg-gray-100 transition"
+                onClick={() => handleDraw()}
               >
-                <GameButton
-                  onClick={async () => {
-                    window.open(DATA.activities[Number(resultData)].url);
-                    setCycle(1);
-                    await updateAction(userId, "행동버튼", serverTime);
+                뽑기
+              </CircularGameButton>
+            </div>
+          ) : (
+            <div className="flex gap-5 md:gap-7 flex-col items-center">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex gap-3 justify-center"
+              >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
+                  animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                  transition={{
+                    type: "spring", // 스프링 애니메이션
+                    stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+                    damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+                    mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+                    delay: 0.2, // 시작 지연
                   }}
-                  className={`flex justify-center items-center gap-2 backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 py-3 md:py-7 md:px-7 md:text-2xl ${
-                    cycle === 1 ? "text-white bg-white/10" : "text-black bg-white"
-                  } border-2 rounded-full`}
+                  className=""
                 >
-                  {cycle === 1 ? (
-                    <div className="relative w-3 h-3 md:w-5 md:h-5 flex flex-col items-center">
+                  <GameButton
+                    onClick={async () => {
+                      window.open(DATA.activities[Number(resultData)].url);
+                      setCycle(1);
+                      await updateAction(userId, "행동버튼", serverTime);
+                    }}
+                    className={`flex justify-center items-center gap-2 backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 py-3 md:py-7 md:px-7 md:text-2xl ${
+                      cycle === 1 ? "text-white bg-white/10" : "text-black bg-white"
+                    } border-2 rounded-full`}
+                  >
+                    {cycle === 1 ? (
+                      <div className="relative w-3 h-3 md:w-5 md:h-5 flex flex-col items-center">
+                        <Image
+                          src={"arrow-up-right.svg"}
+                          alt="check"
+                          fill
+                          className="object-contain rounded-[32px] z-0"
+                        />
+                      </div>
+                    ) : (
+                      <></>
+                    )}
+
+                    <span className={"break-keep"}>
+                    {DATA.activities[Number(resultData)].activityButtonTitle}
+                  </span>
+                  </GameButton>
+                </motion.div>
+              </motion.div>
+              {cycle === 1 ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
+                  animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                  transition={{
+                    type: "spring", // 스프링 애니메이션
+                    stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+                    damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+                    mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+                    delay: 0.4, // 시작 지연
+                  }}
+                  className=""
+                >
+                  <GameButton
+                    onClick={async () => {
+                      // TODO: 했어요를 눌렀을 때 로직. 서버에 uid와 함께 전송.
+                      setCycle(2);
+                      await completeToday();
+                    }}
+                    className={
+                      "justify-center backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 md:px-7 py-3 md:py-7 md:text-2xl text-black border-2 border-white/20 bg-white rounded-full flex gap-1 items-center"
+                    }
+                  >
+                    <div className="relative w-5 h-5 md:w-7 md:h-7 flex flex-col items-center">
                       <Image
-                        src={"arrow-up-right.svg"}
+                        src={"check-badge.svg"}
                         alt="check"
                         fill
                         className="object-contain rounded-[32px] z-0"
                       />
                     </div>
-                  ) : (
-                    <></>
-                  )}
-
-                  <span className={"break-keep"}>
-                    {DATA.activities[Number(resultData)].activityButtonTitle}
-                  </span>
-                </GameButton>
-              </motion.div>
-            </motion.div>
-            {cycle === 1 ? (
+                    <span>완료했어요</span>
+                  </GameButton>
+                </motion.div>
+              ) : (
+                <></>
+              )}
               <motion.div
-                initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
-                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                transition={{
-                  type: "spring", // 스프링 애니메이션
-                  stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
-                  damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
-                  mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
-                  delay: 0.4, // 시작 지연
-                }}
-                className=""
+                initial={{ opacity: 0, filter: "blur(10px)" }}
+                animate={{ opacity: 1, filter: "blur(0px)" }}
+                transition={{ delay: 0.5, duration: 1 }}
               >
                 <GameButton
-                  onClick={async () => {
-                    // TODO: 했어요를 눌렀을 때 로직. 서버에 uid와 함께 전송.
-                    setCycle(2);
-                    await completeToday();
+                  onClick={() => {
+                    setIsNowCancel(true);
                   }}
                   className={
-                    "justify-center backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 md:px-7 py-3 md:py-7 md:text-2xl text-black border-2 border-white/20 bg-white rounded-full flex gap-1 items-center"
+                    "backdrop-contrast-200 backdrop-saturate-150 mt-10 min-w-30 px-3 py-3 md:py-7 md:px-7 md:text-2xl text-white/50 border-2 border-white/20 rounded-full"
                   }
                 >
-                  <div className="relative w-5 h-5 md:w-7 md:h-7 flex flex-col items-center">
-                    <Image
-                      src={"check-badge.svg"}
-                      alt="check"
-                      fill
-                      className="object-contain rounded-[32px] z-0"
-                    />
-                  </div>
-                  <span>완료했어요</span>
+                  오늘은 안할래요
                 </GameButton>
               </motion.div>
-            ) : (
-              <></>
-            )}
-            <motion.div
-              initial={{ opacity: 0, filter: "blur(10px)" }}
-              animate={{ opacity: 1, filter: "blur(0px)" }}
-              transition={{ delay: 0.5, duration: 1 }}
-            >
-              <GameButton
-                onClick={() => {
-                  setIsNowCancel(true);
-                }}
-                className={
-                  "backdrop-contrast-200 backdrop-saturate-150 mt-10 min-w-30 px-3 py-3 md:py-7 md:px-7 md:text-2xl text-white/50 border-2 border-white/20 rounded-full"
-                }
-              >
-                오늘은 안할래요
-              </GameButton>
-            </motion.div>
-          </div>
-        )}
+            </div>
+          )}
+        </motion.div>
+
       </motion.div>
       <AnimatePresence>
         {isNowCancel && (
@@ -587,7 +591,7 @@ const Overlay = ({ setIsNowCancel }: overlay) => {
     <motion.div
       initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
       animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-      exit={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
+      exit={{ opacity: 0, scale: 0, filter: "blur(20px)" }}
       transition={{
         type: "spring", // 스프링 애니메이션
         stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
@@ -596,7 +600,7 @@ const Overlay = ({ setIsNowCancel }: overlay) => {
         delay: 0, // 시작 지연
         duration: 0.2
       }}
-      className={"rounded-xl bg-white/75 backdrop-saturate-200 backdrop-contrast-200 backdrop-brightness-200 backdrop-blur-3xl w-fit px-10 py-10 mx-5"}
+      className={"rounded-xl bg-white/90 backdrop-saturate-200 backdrop-contrast-200 backdrop-brightness-200 backdrop-blur-3xl w-fit px-10 py-10 mx-5"}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.7, filter: "blur(5px)" }}
