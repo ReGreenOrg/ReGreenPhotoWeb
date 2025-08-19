@@ -48,3 +48,23 @@ button {
   border: none;
   cursor: pointer;
 }
+
+@media (orientation: landscape) {
+  body::before {
+    content: "세로 모드에서만 이용할 수 있어요.";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: calc(var(--vh, 1vh) * 100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 1rem 2rem;
+    z-index: 9999;
+    backdrop-filter: blur(10px);
+  }
+}

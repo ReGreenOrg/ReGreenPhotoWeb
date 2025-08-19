@@ -44,11 +44,21 @@ const RandomPage = () => {
 
   useEffect(() => {
     function setVh() {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty("--vh", `${vh}px`);
+      setTimeout(() => {
+        let vh = window.innerHeight * 0.01;
+        if (vh > 10) vh = 10; // 과도한 값 제한
+        document.documentElement.style.setProperty("--vh", `${vh}px`);
+      }, 150);
     }
+
     setVh();
     window.addEventListener("resize", setVh);
+    window.addEventListener("orientationchange", setVh);
+
+    return () => {
+      window.removeEventListener("resize", setVh);
+      window.removeEventListener("orientationchange", setVh);
+    };
   }, []);
 
   useEffect(() => {
