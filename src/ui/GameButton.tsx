@@ -9,18 +9,22 @@ type GameButtonProps = {
 export function GameButton(props: GameButtonProps) {
   const [isPressed, setIsPressed] = useState(false);
 
+  const press = (isPress: boolean) => {
+    setIsPressed(isPress);
+  }
+
   return (
     <motion.button
       onClick={() => props.onClick()}
       className={
         props.className + " duration-100 ease-out " + (isPressed ? "translate-y-2 scale-y-95" : "")
       }
-      onMouseDown={() => setIsPressed(true)}
-      onMouseUp={() => setIsPressed(false)}
-      onMouseLeave={() => setIsPressed(false)}
-      onTouchStart={() => setIsPressed(true)}
-      onTouchEnd={() => setIsPressed(false)}
-      onTouchCancel={() => setIsPressed(false)}
+      onMouseDown={() => press(true)}
+      onMouseUp={() => press(false)}
+      onMouseLeave={() => press(false)}
+      onTouchStart={() => press(true)}
+      onTouchEnd={() => press(false)}
+      onTouchCancel={() => press(false)}
     >
       {props.children}
     </motion.button>
