@@ -22,7 +22,7 @@
   font-family: "LINESeedKR", sans-serif;
 }
 :root {
-  --background: #ffffff;
+  --background: #151515;
   --foreground: #171717;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -38,10 +38,19 @@ body {
 }
 
 @layer utilities {
-  .h-screen-safe {
-    height: calc(var(--vh, 1vh) * 100);
+  @media (max-width: 784px) and (orientation: portrait) {
+    .h-screen-safe {
+      height: calc(var(--vh, 1vh) * 100);
+    }
   }
-  @media (max-width: 1000px) and (orientation: landscape) {
+  @media (min-width: 784px) {
+    @layer utilities {
+      .h-screen-safe {
+        height: 100vh;
+      }
+    }
+  }
+  @media (max-width: 784px) and (orientation: landscape) {
     body::before {
       content: "세로 모드에서만 이용할 수 있어요.";
       position: fixed;
@@ -59,12 +68,6 @@ body {
       z-index: 9999;
       backdrop-filter: blur(10px);
     }
-    @layer utilities {
-      .h-screen-safe {
-        height: calc(var(--vh, 1vh) * 100);
-      }
-    }
-
   }
 }
 
