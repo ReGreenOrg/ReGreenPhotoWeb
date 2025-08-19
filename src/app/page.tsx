@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import {AnimatePresence, motion} from "framer-motion";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import Aurora from "@/ui/Aurora";
@@ -558,17 +558,20 @@ const RandomPage = () => {
           </div>
         )}
       </motion.div>
-      {isNowCancel ? (
-        <motion.div
-          className={
-            "fixed flex items-center justify-center w-[100vw] h-screen-safe top-0 bg-black/50 z-20"
-          }
-        >
-          <Overlay setIsNowCancel={setIsNowCancel} /> : <></>
-        </motion.div>
-      ) : (
-        <></>
-      )}
+      <AnimatePresence>
+        {isNowCancel && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className={
+              "fixed flex items-center justify-center w-[100vw] h-screen-safe top-0 bg-black/50 z-20"
+            }
+          >
+            <Overlay setIsNowCancel={setIsNowCancel} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -582,35 +585,61 @@ type overlay = {
 const Overlay = ({ setIsNowCancel }: overlay) => {
   return (
     <motion.div
-      initial={{
-        scale: 0,
-        opacity: 0,
-        filter: "blur(10px)",
+      initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
+      animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      exit={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
+      transition={{
+        type: "spring", // 스프링 애니메이션
+        stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+        damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+        mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+        delay: 0, // 시작 지연
+        duration: 0.2
       }}
-      animate={{
-        scale: 1,
-        opacity: 1,
-        filter: "blur(0px)",
-      }}
-      className={"rounded-xl bg-white w-fit px-10 py-10 mx-5"}
+      className={"rounded-xl bg-white/75 backdrop-saturate-200 backdrop-contrast-200 backdrop-brightness-200 backdrop-blur-3xl w-fit px-10 py-10 mx-5"}
     >
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, scale: 0.7, filter: "blur(5px)" }}
+        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+        transition={{
+          type: "spring", // 스프링 애니메이션
+          stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+          damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+          mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+          delay: 0.1, // 시작 지연
+          duration: 0.2
+        }}
         className={"text-2xl font-bold mb-5"}
       >
         정말 안하실건가요?
       </motion.div>
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className={"break-keep"}
+        initial={{ opacity: 0, scale: 0.7, filter: "blur(5px)" }}
+        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+        transition={{
+          type: "spring", // 스프링 애니메이션
+          stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+          damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+          mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+          delay: 0.2, // 시작 지연
+          duration: 0.2
+        }}
       >
         페이지를 나가도 오늘 안에 다시 도전할 수 있어요!
       </motion.div>
       <div className={"flex flex-col gap-5 mt-10"}>
-        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2 }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.7, filter: "blur(5px)" }}
+          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          transition={{
+            type: "spring", // 스프링 애니메이션
+            stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+            damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+            mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+            delay: 0.3, // 시작 지연
+            duration: 0.2
+          }}
+        >
           <GameButton
             onClick={() => {
               setIsNowCancel(false);
@@ -620,7 +649,18 @@ const Overlay = ({ setIsNowCancel }: overlay) => {
             <div className={"w-full bg-gray-800 py-5 rounded-full text-white"}>계속 할래요</div>
           </GameButton>
         </motion.div>
-        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3 }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.7, filter: "blur(5px)" }}
+          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          transition={{
+            type: "spring", // 스프링 애니메이션
+            stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+            damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+            mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+            delay: 0.4, // 시작 지연
+            duration: 0.2
+          }}
+        >
           <GameButton
             onClick={() => {
               window.history.back();
