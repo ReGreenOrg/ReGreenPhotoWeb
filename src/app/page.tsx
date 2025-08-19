@@ -303,9 +303,16 @@ const RandomPage = () => {
           내일은 더 재밌는 미션이 준비되어 있어요.
         </motion.div>
         <motion.div
-          initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
+          initial={{ opacity: 0, scale: 0.7, filter: "blur(5px)" }}
           animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-          transition={{ delay: 0.15 }}
+          transition={{
+            type: "spring", // 스프링 애니메이션
+            stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+            damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+            mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+            delay: 0.2, // 시작 지연
+            duration: 0.2
+          }}
           className={"w-full md:w-72 mt-5"}
         >
           <GameButton
@@ -341,9 +348,16 @@ const RandomPage = () => {
           </GameButton>
         </motion.div>
         <motion.div
-          initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
+          initial={{ opacity: 0, scale: 0.7, filter: "blur(5px)" }}
           animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-          transition={{ delay: 0.2 }}
+          transition={{
+            type: "spring", // 스프링 애니메이션
+            stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+            damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+            mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+            delay: 0.3, // 시작 지연
+            duration: 0.3
+          }}
           className={"w-full md:w-72 mt-5"}
         >
           <GameButton
@@ -613,7 +627,7 @@ const Overlay = ({ setIsNowCancel }: overlay) => {
           delay: 0.1, // 시작 지연
           duration: 0.2
         }}
-        className={"text-2xl font-bold mb-5"}
+        className={"text-2xl font-bold mb-5 break-keep"}
       >
         정말 안하실건가요?
       </motion.div>
@@ -628,6 +642,7 @@ const Overlay = ({ setIsNowCancel }: overlay) => {
           delay: 0.2, // 시작 지연
           duration: 0.2
         }}
+        className={"break-keep"}
       >
         페이지를 나가도 오늘 안에 다시 도전할 수 있어요!
       </motion.div>
