@@ -36,10 +36,8 @@ const RandomPage = () => {
   const [isNowCancel, setIsNowCancel] = useState(false);
 
   const [userId, setUserId] = useState<string>("");
-  // const [setUserActioned] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [isActionButtonClicked, setIsActionButtonClicked] = useState(false);
   const [resultData, setResultData] = useState("");
 
   const [cycle, setCycle] = useState<2 | 1 | 0>(0);
@@ -76,7 +74,6 @@ const RandomPage = () => {
         if (userData) {
           setUserId(guid);
           realId = guid;
-          // setUserActioned(userData.actioned);
         }
       } else {
         const serverData = await getUserData(uid);
@@ -93,13 +90,11 @@ const RandomPage = () => {
           if (userData) {
             setUserId(guid);
             realId = guid;
-            // setUserActioned(userData.actioned);
           }
         } else {
           // localStorage UID가 Server에 있으면 정상적인 UID로 판별.
           setUserId(uid);
           realId = uid;
-          // setUserActioned(serverData.actioned);
         }
       }
       console.log("uid 발급 완료: ", realId);
@@ -164,19 +159,7 @@ const RandomPage = () => {
     }
   };
 
-  const updateUserActioned = async (uid: string) => {
-    console.log("updateUserActioned", uid);
-    const userData = await getUserData(uid);
-    if (userData) {
-      console.log("updateUserActioned: ", userData);
-      // setUserActioned(userData.actioned);
-    } else {
-      console.error("userId가 설정되지 않았어요.", uid);
-    }
-  };
-
   const getTodayActioned = async (uid: string): Promise<string[]> => {
-    // await updateUserActioned(uid);
     const actioned = (await getUserData(uid))?.actioned;
     console.log("userActioned:", actioned);
     return actioned.filter((a: string) => {
@@ -242,14 +225,6 @@ const RandomPage = () => {
     if (isAnimating) return;
     setIsAnimating(true);
 
-    // const lastDate = localStorage.getItem("lastDate");
-    // const savedMonth = Number(lastDate ? lastDate!.split(".")[0] : 0);
-    // const savedDay = Number(lastDate ? lastDate!.split(".")[1] : 0);
-    // if ((new Date(2025, savedMonth - 1, savedDay)).getTime() === (new Date(2025, today.getMonth(), today.getDate())).getTime()) {
-    //   console.error("오늘 이미 행동을 뽑았습니다.");
-    //   return;
-    // }
-
     const todayProgress = await getTodayActioned(userId);
     if (todayProgress.length >= 1) {
       // 오늘 한 게 아무것도 없으면?
@@ -258,7 +233,6 @@ const RandomPage = () => {
       return;
     }
 
-    setIsActionButtonClicked(false);
     setCycle(0);
 
     setTimeout(() => {
@@ -267,9 +241,7 @@ const RandomPage = () => {
       setResultData(result.toString());
       (async () => {
         try {
-          console.log(userId);
           await updateAction(userId, "뽑기", serverTime, result.toString());
-          await updateUserActioned(userId);
         } catch (err) {
           console.error("뽑기 결과를 저장하는 중 문제가 생겼어요.", err);
         }
@@ -296,7 +268,7 @@ const RandomPage = () => {
       />
       <div className={"text-sm"}>당신의 하루를 재밌게 만들어 줄 미션을 만들고 있어요.</div>
     </div>
-  ) : cycle === 2 && resultData !== "" ? (
+  ) : cycle === 2 ? (
     <div className="w-[100vw] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl h-screen-safe p-10">
       <motion.div className={"absolute -z-0 w-[100vw] h-screen-safe"}>
         <Aurora colorStops={["#4b4c1e", "#233a56", "#bd63ed"]} />
@@ -417,8 +389,8 @@ const RandomPage = () => {
         {resultData !== "" ? (
           <motion.div className="text-6xl text-gray-50 flex items-center flex-col space-y-10">
             <motion.div
-              initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, scale: 1.2, filter: "blur(10px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
               transition={{ duration: 0.3 }}
               className="relative w-60 h-60 md:w-90 md:h-90 flex flex-col items-center"
             >
@@ -426,12 +398,12 @@ const RandomPage = () => {
                 src={DATA.activities[Number(resultData)].imageSrc + ".png"}
                 alt="추첨 이미지"
                 fill
-                className="object-contain rounded-[32px] z-0"
+                className="object-contain rounded-[32px] z-0 bg-white/10 backdrop-blur-3xl backdrop-contrast-200 backdrop-saturate-200"
               />
             </motion.div>
             <motion.div
-              initial={{ opacity: 0, y: 10, filter: "blur(10px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              initial={{ opacity: 0, scale: 1.2, filter: "blur(10px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
               transition={{ delay: 0.1, duration: 0.3 }}
             >
               <GradientText
@@ -483,7 +455,7 @@ const RandomPage = () => {
             </CircularGameButton>
           </div>
         ) : (
-          <div className="flex gap-5 md:gap-7 flex-col">
+          <div className="flex gap-5 md:gap-7 flex-col items-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -504,14 +476,14 @@ const RandomPage = () => {
                 <GameButton
                   onClick={async () => {
                     window.open(DATA.activities[Number(resultData)].url);
-                    setIsActionButtonClicked(true);
+                    setCycle(1);
                     await updateAction(userId, "행동버튼", serverTime);
                   }}
                   className={`flex justify-center items-center gap-2 backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 py-3 md:py-7 md:px-7 md:text-2xl ${
-                    isActionButtonClicked ? "text-white bg-white/10" : "text-black bg-white"
+                    cycle === 1 ? "text-white bg-white/10" : "text-black bg-white"
                   } border-2 rounded-full`}
                 >
-                  {isActionButtonClicked ? (
+                  {cycle === 1 ? (
                     <div className="relative w-3 h-3 md:w-5 md:h-5 flex flex-col items-center">
                       <Image
                         src={"arrow-up-right.svg"}
@@ -530,27 +502,40 @@ const RandomPage = () => {
                 </GameButton>
               </motion.div>
             </motion.div>
-            {isActionButtonClicked ? (
-              <GameButton
-                onClick={async () => {
-                  // TODO: 했어요를 눌렀을 때 로직. 서버에 uid와 함께 전송.
-                  setCycle(2);
-                  await completeToday();
+            {cycle === 1 ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
+                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                transition={{
+                  type: "spring", // 스프링 애니메이션
+                  stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+                  damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+                  mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+                  delay: 0.4, // 시작 지연
                 }}
-                className={
-                  "justify-center backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 md:px-7 py-3 md:py-7 md:text-2xl text-black border-2 border-white/20 bg-white rounded-full flex gap-1 items-center"
-                }
+                className=""
               >
-                <div className="relative w-5 h-5 md:w-7 md:h-7 flex flex-col items-center">
-                  <Image
-                    src={"check-badge.svg"}
-                    alt="check"
-                    fill
-                    className="object-contain rounded-[32px] z-0"
-                  />
-                </div>
-                <span>완료했어요</span>
-              </GameButton>
+                <GameButton
+                  onClick={async () => {
+                    // TODO: 했어요를 눌렀을 때 로직. 서버에 uid와 함께 전송.
+                    setCycle(2);
+                    await completeToday();
+                  }}
+                  className={
+                    "justify-center backdrop-contrast-200 backdrop-saturate-150 min-w-30 px-3 md:px-7 py-3 md:py-7 md:text-2xl text-black border-2 border-white/20 bg-white rounded-full flex gap-1 items-center"
+                  }
+                >
+                  <div className="relative w-5 h-5 md:w-7 md:h-7 flex flex-col items-center">
+                    <Image
+                      src={"check-badge.svg"}
+                      alt="check"
+                      fill
+                      className="object-contain rounded-[32px] z-0"
+                    />
+                  </div>
+                  <span>완료했어요</span>
+                </GameButton>
+              </motion.div>
             ) : (
               <></>
             )}
@@ -638,7 +623,6 @@ const Overlay = ({ setIsNowCancel }: overlay) => {
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3 }}>
           <GameButton
             onClick={() => {
-              // TODO: 서버에 저장.
               window.history.back();
             }}
             className={"w-full"}
