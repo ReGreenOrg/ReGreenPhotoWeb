@@ -9,7 +9,6 @@ import GradientText from "@/ui/GradientText";
 import { GameButton } from "@/ui/GameButton";
 import { CircularGameButton } from "@/ui/CircularGameButton";
 import { DATA } from "@/lib/activityData";
-import SplitText from "@/ui/SplitText";
 import { db } from "@/app/api/firebase/firebase-sdk";
 import {
   arrayRemove,
@@ -39,11 +38,14 @@ const RandomPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
   const [resultData, setResultData] = useState("");
+  const [weekData, setWeekData] = useState([]);
+  const [nearUser, setNearUser] = useState<string[]>([]);
 
-  const [cycle, setCycle] = useState<2 | 1 | 0 | -1>(-1);
+  const [cycle, setCycle] = useState<2 | 1 | 0 | -1 | -2>(-2);
+  const [actionState, setActionState] = useState<"최초"|"뽑기"|"행동버튼"|"완료">("최초");
 
   useEffect(() => {
-    function setVh() {
+    function getVh() {
       setTimeout(() => {
         let vh = window.innerHeight * 0.01;
         if (vh > 10) vh = 10; // 과도한 값 제한
@@ -51,13 +53,13 @@ const RandomPage = () => {
       }, 150);
     }
 
-    setVh();
-    window.addEventListener("resize", setVh);
-    window.addEventListener("orientationchange", setVh);
+    getVh();
+    window.addEventListener("resize", getVh);
+    window.addEventListener("orientationchange", getVh);
 
     return () => {
-      window.removeEventListener("resize", setVh);
-      window.removeEventListener("orientationchange", setVh);
+      window.removeEventListener("resize", getVh);
+      window.removeEventListener("orientationchange", getVh);
     };
   }, []);
 
@@ -112,17 +114,36 @@ const RandomPage = () => {
       const todayData = await getTodayActioned(realId);
       if (todayData.length >= 1) {
         if (todayData[0].split("__")[2] === "완료") {
-          setCycle(2);
+          // setCycle(2);
+          setActionState("완료")
+          setCycle(-1);
         } else {
-          setCycle(1);
+          // setCycle(1);
+          setActionState("뽑기")
+          setCycle(-1);
         }
         setResultData(todayData[0].split("__")[1]);
       } else {
-        setCycle(0);
+        setCycle(-1);
+        setActionState("최초")
         setResultData("");
       }
     })();
     setIsLoading(false);
+  }, []);
+
+  useEffect(function drawNearUser() {
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
+
+    const randN = Math.floor(Math.random() * 5);
+
+    for (let i = 0; i < randN; i++) {
+      const randX = Math.floor(Math.random() * vw);
+      const randY = Math.floor(Math.random() * vh);
+      const randIcon = Math.floor(Math.random() * 5);
+      setNearUser(prev => [...prev, `${vw * 0.2 + randX*0.6},${vh * 0.2 + randY*0.6},${["😎", "🥹", "🥲", "😔", "🥰"][randIcon]}`]);
+    }
   }, []);
 
   const serverTime = new Date();
@@ -250,6 +271,7 @@ const RandomPage = () => {
       (async () => {
         try {
           await updateAction(userId, "뽑기", serverTime, result.toString());
+          setActionState("뽑기");
         } catch (err) {
           console.error("뽑기 결과를 저장하는 중 문제가 생겼어요.", err);
         }
@@ -259,24 +281,165 @@ const RandomPage = () => {
     }, 4000);
   };
 
-  return isLoading || !userId || cycle === -1 ? (
-    <div className="w-[100vw] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl h-screen-safe">
-      <SplitText
-        text="조금만 기다려주세요!"
-        className="text-2xl font-semibold text-center"
-        delay={100}
-        duration={0.6}
-        ease="power3.out"
-        splitType="chars"
-        from={{ opacity: 0, y: 40 }}
-        to={{ opacity: 1, y: 0 }}
-        threshold={0.1}
-        rootMargin="-100px"
-        textAlign="center"
-      />
-      <div className={"text-sm"}>당신의 하루를 재밌게 만들어 줄 미션을 만들고 있어요.</div>
+  return isLoading || !userId || cycle === -2 ? (
+    <div className="w-[100vw] h-[100vh] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl overflow-hidden">
+      잠시만 기다려주세요.
     </div>
-  ) : cycle === 2 ? (
+  ) : cycle === -1 ? (<div className="w-[100vw] h-screen-safe flex flex-col items-center justify-center text-center bg-gray-200 text-white overflow-hidden">
+      <div className={"overflow-hidden h-screen-safe"}>
+        <motion.div
+          initial={{ scale: 0.7 }}
+          animate={{ scale: 1 }}
+          transition={{
+            type: "spring", // 스프링 애니메이션
+            stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+            damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+            mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+            delay: 0.2, // 시작 지연
+            duration: 0.2
+          }}
+          className={"w-[80vh] h-[80vh] border-2 border-black/5 rounded-full flex items-center justify-center"}>
+          <motion.div
+            initial={{ scale: 0.5 }}
+            animate={{ scale: 1 }}
+            transition={{
+              type: "spring", // 스프링 애니메이션
+              stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+              damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+              mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+              delay: 0.3, // 시작 지연
+              duration: 0.2,
+            }}
+            className={"w-[60vh] h-[60vh] border-2 border-black/10 rounded-full flex items-center justify-center"}>
+            <motion.div
+              initial={{ scale: 0.3 }}
+              animate={{ scale: 1 }}
+              transition={{
+                type: "spring", // 스프링 애니메이션
+                stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+                damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+                mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+                delay: 0.4, // 시작 지연
+                duration: 0.2
+              }}
+              className={"w-[40vh] h-[40vh] border-2 border-black/15 rounded-full flex items-center justify-center"}>
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{
+                  type: "spring", // 스프링 애니메이션
+                  stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+                  damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+                  mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+                  delay: 0.5, // 시작 지연
+                  duration: 0.2
+                }}
+                className={"w-[20vh] h-[20vh] border-2 border-black/20 rounded-full flex items-center justify-center"}>
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{
+                    type: "spring", // 스프링 애니메이션
+                    stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+                    damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+                    mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+                    delay: 0, // 시작 지연
+                    duration: 0.2
+                  }}
+                  className={"w-[7vh] h-[7vh] bg-gray-800 rounded-full flex items-center justify-center font-bold z-100"}>
+                  <motion.div
+                    className="relative w-[3vh] h-[3vh] md:w-10 md:h-10 flex flex-col items-center"
+                  >
+                    <Image
+                      src={"map-pin.svg"}
+                      alt="추첨 이미지"
+                      fill
+                      className="object-contain z-0 md:w-40 md:h-40"
+                    />
+                  </motion.div>
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
+        {
+          nearUser.map((user, index) =>
+            <motion.div
+              key={index}
+              style={{
+                position: "absolute",
+                top: Number(user.split(",")[1]),
+                left: Number(user.split(",")[0])
+              }}
+              initial={{ scale: 0, opacity: 0, filter: "blur(10px)" }}
+              animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
+              transition={{
+                type: "spring", // 스프링 애니메이션
+                stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+                damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+                mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+                delay: 0.7 + 0.1 * index, // 시작 지연
+                duration: 0.2
+              }}
+              className={`w-16 h-16 bg-white rounded-full z-20 border-2 border-gray-600 flex items-center justify-center text-xl md:text-2xl`}>{user.split(",")[2]}</motion.div>
+          )
+        }
+      </div>
+      <motion.div
+        className={"z-100 bottom-0 w-[100vw] bg-gradient-to-t from-white/100 to-white/0 p-5 flex flex-col items-center"}
+        initial={{ opacity: 0, bottom: -50 }}
+        animate={{ opacity: 1, bottom: 0 }}
+        transition={{
+          type: "spring", // 스프링 애니메이션
+          stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+          damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+          mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+          duration: 0.3
+        }}
+      >
+        <motion.div className={"mb-5"}>
+          <GradientText
+            colors={["#9e1a4c", "#2d44ba", "#681893"]}
+            animationSpeed={5}
+            showBorder={false}
+            className="custom-class bg-transparent"
+          >
+            <div className={"text-sm md:text-xl font-semibold break-keep"}>
+              {
+                actionState === "최초" || actionState === "뽑기" || actionState === "행동버튼"
+                ? `지금 당신 근처에서 ${nearUser.length}명이 미션을 하고 있어요!`
+                : "오늘의 미션을 완료했어요!"
+              }
+            </div>
+          </GradientText>
+        </motion.div>
+        <GameButton
+          onClick={async () => {
+            if (actionState === "최초") {
+              await handleDraw();
+            } else if (actionState === "뽑기") {
+              setCycle(1);
+            } else if (actionState === "완료") {
+              setCycle(2);
+            }
+          }}
+          className={
+            "w-full md:w-fit justify-center min-w-30 px-3 md:px-7 py-5 md:py-7 md:text-xl text-white bg-gray-700 rounded-full flex gap-1 items-center"
+          }
+        >
+          <span>{
+            actionState === "최초"
+              ? "버튼 눌러서 무기력함 떨쳐내기"
+              : actionState === "뽑기" || actionState === "행동버튼"
+                ? DATA.activities[Number(resultData)]!.title
+                : actionState === "완료"
+                  ? "이번 주 미션 현황 보기"
+                  : ""
+          }</span>
+        </GameButton>
+      </motion.div>
+    </div>)
+    : cycle === 2 ? (
     <div className="w-[100vw] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl h-screen-safe p-10">
       <motion.div className={"absolute -z-0 w-[100vw] h-screen-safe"}>
         <Aurora colorStops={["#4b4c1e", "#233a56", "#bd63ed"]} />
@@ -285,8 +448,25 @@ const RandomPage = () => {
         <motion.div
           initial={{ opacity: 0, filter: "blur(10px)" }}
           animate={{ opacity: 1, filter: "blur(0px)" }}
-        >
-          <img src={"festival.gif"} alt={"폭죽"} className={"w-full"} />
+          className={"flex items-center justify-center gap-2"}>
+          {
+            [0, 1, 0, 0, 1, 1, 0].map((item, index) => <motion.div
+              key={index}
+              className={`w-12 h-12 rounded-lg border-2 ${item === 1 ? "bg-white border-white" : "bg-white/10 border-white/20"}`}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{
+                type: "spring", // 스프링 애니메이션
+                stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+                damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+                mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+                delay: 0.05 * index, // 시작 지연
+              }}
+            >
+
+            </motion.div>)
+          }
+          {/*<img src={"festival.gif"} alt={"폭죽"} className={"w-full"} />*/}
         </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
@@ -596,7 +776,7 @@ const RandomPage = () => {
               "fixed flex items-center justify-center w-[100vw] h-screen-safe top-0 bg-black/50 z-20"
             }
           >
-            <Overlay setIsNowCancel={setIsNowCancel} />
+            <Overlay setIsNowCancel={setIsNowCancel} setCycle={setCycle} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -608,9 +788,10 @@ export default RandomPage;
 
 type overlay = {
   setIsNowCancel: (x: boolean) => void;
+  setCycle: (x: -2|-1|0|1|2 ) => void;
 };
 
-const Overlay = ({ setIsNowCancel }: overlay) => {
+const Overlay = ({ setIsNowCancel, setCycle }: overlay) => {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0, filter: "blur(10px)" }}
@@ -692,7 +873,8 @@ const Overlay = ({ setIsNowCancel }: overlay) => {
         >
           <GameButton
             onClick={() => {
-              window.history.back();
+              setCycle(-1);
+              setIsNowCancel(false);
             }}
             className={"w-full"}
           >
