@@ -420,7 +420,21 @@ const RandomPage = () => {
             } else if (actionState === "뽑기") {
               setCycle(1);
             } else if (actionState === "완료") {
-              setCycle(2);
+              if (navigator.share) {
+                try {
+                  await navigator.share({
+                    title: "MURMUR에서 하루 미션 받기",
+                    text: "무기력한 일상을 하루 한 개 미션으로 떨쳐내볼까요?",
+                    url: window.location.href,
+                  });
+                  console.log("공유 성공!");
+                  await addShare();
+                } catch (err) {
+                  console.error("공유 취소/실패:", err);
+                }
+              } else {
+                alert("이 브라우저는 공유하기를 지원하지 않습니다.");
+              }
             }
           }}
           className={
@@ -433,7 +447,7 @@ const RandomPage = () => {
               : actionState === "뽑기" || actionState === "행동버튼"
                 ? DATA.activities[Number(resultData)]!.title
                 : actionState === "완료"
-                  ? "이번 주 미션 현황 보기"
+                  ? "친구에게 공유하기"
                   : ""
           }</span>
         </GameButton>
@@ -449,24 +463,24 @@ const RandomPage = () => {
           initial={{ opacity: 0, filter: "blur(10px)" }}
           animate={{ opacity: 1, filter: "blur(0px)" }}
           className={"flex items-center justify-center gap-2"}>
-          {
-            [0, 1, 0, 0, 1, 1, 0].map((item, index) => <motion.div
-              key={index}
-              className={`w-12 h-12 rounded-lg border-2 ${item === 1 ? "bg-white border-white" : "bg-white/10 border-white/20"}`}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{
-                type: "spring", // 스프링 애니메이션
-                stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
-                damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
-                mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
-                delay: 0.05 * index, // 시작 지연
-              }}
-            >
+          {/*{*/}
+          {/*  [0, 1, 0, 0, 1, 1, 0].map((item, index) => <motion.div*/}
+          {/*    key={index}*/}
+          {/*    className={`w-12 h-12 rounded-lg border-2 ${item === 1 ? "bg-white border-white" : "bg-white/10 border-white/20"}`}*/}
+          {/*    initial={{ scale: 0, opacity: 0 }}*/}
+          {/*    animate={{ scale: 1, opacity: 1 }}*/}
+          {/*    transition={{*/}
+          {/*      type: "spring", // 스프링 애니메이션*/}
+          {/*      stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)*/}
+          {/*      damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)*/}
+          {/*      mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)*/}
+          {/*      delay: 0.05 * index, // 시작 지연*/}
+          {/*    }}*/}
+          {/*  >*/}
 
-            </motion.div>)
-          }
-          {/*<img src={"festival.gif"} alt={"폭죽"} className={"w-full"} />*/}
+          {/*  </motion.div>)*/}
+          {/*}*/}
+          <img src={"festival.gif"} alt={"폭죽"} className={"w-full"} />
         </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
@@ -552,7 +566,7 @@ const RandomPage = () => {
         >
           <GameButton
             onClick={() => {
-              window.history.back();
+              setCycle(-1);
             }}
             className={"w-full md:w-72"}
           >
