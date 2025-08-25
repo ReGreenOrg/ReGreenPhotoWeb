@@ -1,6 +1,6 @@
 "use client";
 
-import {AnimatePresence, motion} from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import Aurora from "@/ui/Aurora";
@@ -38,11 +38,11 @@ const RandomPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
   const [resultData, setResultData] = useState("");
-  const [weekData, setWeekData] = useState([]);
+
   const [nearUser, setNearUser] = useState<string[]>([]);
 
   const [cycle, setCycle] = useState<2 | 1 | 0 | -1 | -2>(-2);
-  const [actionState, setActionState] = useState<"최초"|"뽑기"|"행동버튼"|"완료">("최초");
+  const [actionState, setActionState] = useState<"최초" | "뽑기" | "행동버튼" | "완료">("최초");
 
   useEffect(() => {
     function getVh() {
@@ -115,17 +115,17 @@ const RandomPage = () => {
       if (todayData.length >= 1) {
         if (todayData[0].split("__")[2] === "완료") {
           // setCycle(2);
-          setActionState("완료")
+          setActionState("완료");
           setCycle(-1);
         } else {
           // setCycle(1);
-          setActionState("뽑기")
+          setActionState("뽑기");
           setCycle(-1);
         }
         setResultData(todayData[0].split("__")[1]);
       } else {
         setCycle(-1);
-        setActionState("최초")
+        setActionState("최초");
         setResultData("");
       }
     })();
@@ -142,7 +142,12 @@ const RandomPage = () => {
       const randX = Math.floor(Math.random() * vw);
       const randY = Math.floor(Math.random() * vh);
       const randIcon = Math.floor(Math.random() * 5);
-      setNearUser(prev => [...prev, `${vw * 0.2 + randX*0.6},${vh * 0.2 + randY*0.6},${["😎", "🥹", "🥲", "😔", "🥰"][randIcon]}`]);
+      setNearUser((prev) => [
+        ...prev,
+        `${vw * 0.2 + randX * 0.6},${vh * 0.2 + randY * 0.6},${
+          ["😎", "🥹", "🥲", "😔", "🥰"][randIcon]
+        }`,
+      ]);
     }
   }, []);
 
@@ -285,7 +290,8 @@ const RandomPage = () => {
     <div className="w-[100vw] h-[100vh] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl overflow-hidden">
       잠시만 기다려주세요.
     </div>
-  ) : cycle === -1 ? (<div className="w-[100vw] h-screen-safe flex flex-col items-center justify-center text-center bg-gray-200 text-white overflow-hidden">
+  ) : cycle === -1 ? (
+    <div className="w-[100vw] h-screen-safe flex flex-col items-center justify-center text-center bg-gray-200 text-white overflow-hidden">
       <div className={"overflow-hidden h-screen-safe"}>
         <motion.div
           initial={{ scale: 0.7 }}
@@ -296,9 +302,12 @@ const RandomPage = () => {
             damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
             mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
             delay: 0.2, // 시작 지연
-            duration: 0.2
+            duration: 0.2,
           }}
-          className={"w-[80vh] h-[80vh] border-2 border-black/5 rounded-full flex items-center justify-center"}>
+          className={
+            "w-[80vh] h-[80vh] border-2 border-black/5 rounded-full flex items-center justify-center"
+          }
+        >
           <motion.div
             initial={{ scale: 0.5 }}
             animate={{ scale: 1 }}
@@ -310,7 +319,10 @@ const RandomPage = () => {
               delay: 0.3, // 시작 지연
               duration: 0.2,
             }}
-            className={"w-[60vh] h-[60vh] border-2 border-black/10 rounded-full flex items-center justify-center"}>
+            className={
+              "w-[60vh] h-[60vh] border-2 border-black/10 rounded-full flex items-center justify-center"
+            }
+          >
             <motion.div
               initial={{ scale: 0.3 }}
               animate={{ scale: 1 }}
@@ -320,9 +332,12 @@ const RandomPage = () => {
                 damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
                 mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
                 delay: 0.4, // 시작 지연
-                duration: 0.2
+                duration: 0.2,
               }}
-              className={"w-[40vh] h-[40vh] border-2 border-black/15 rounded-full flex items-center justify-center"}>
+              className={
+                "w-[40vh] h-[40vh] border-2 border-black/15 rounded-full flex items-center justify-center"
+              }
+            >
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -332,9 +347,12 @@ const RandomPage = () => {
                   damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
                   mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
                   delay: 0.5, // 시작 지연
-                  duration: 0.2
+                  duration: 0.2,
                 }}
-                className={"w-[20vh] h-[20vh] border-2 border-black/20 rounded-full flex items-center justify-center"}>
+                className={
+                  "w-[20vh] h-[20vh] border-2 border-black/20 rounded-full flex items-center justify-center"
+                }
+              >
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -344,12 +362,13 @@ const RandomPage = () => {
                     damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
                     mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
                     delay: 0, // 시작 지연
-                    duration: 0.2
+                    duration: 0.2,
                   }}
-                  className={"w-[7vh] h-[7vh] bg-gray-800 rounded-full flex items-center justify-center font-bold z-100"}>
-                  <motion.div
-                    className="relative w-[3vh] h-[3vh] md:w-10 md:h-10 flex flex-col items-center"
-                  >
+                  className={
+                    "w-[7vh] h-[7vh] bg-gray-800 rounded-full flex items-center justify-center font-bold z-100"
+                  }
+                >
+                  <motion.div className="relative w-[3vh] h-[3vh] md:w-10 md:h-10 flex flex-col items-center">
                     <Image
                       src={"map-pin.svg"}
                       alt="추첨 이미지"
@@ -362,31 +381,34 @@ const RandomPage = () => {
             </motion.div>
           </motion.div>
         </motion.div>
-        {
-          nearUser.map((user, index) =>
-            <motion.div
-              key={index}
-              style={{
-                position: "absolute",
-                top: Number(user.split(",")[1]),
-                left: Number(user.split(",")[0])
-              }}
-              initial={{ scale: 0, opacity: 0, filter: "blur(10px)" }}
-              animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-              transition={{
-                type: "spring", // 스프링 애니메이션
-                stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
-                damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
-                mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
-                delay: 0.7 + 0.1 * index, // 시작 지연
-                duration: 0.2
-              }}
-              className={`w-16 h-16 bg-white rounded-full z-20 border-2 border-gray-600 flex items-center justify-center text-xl md:text-2xl`}>{user.split(",")[2]}</motion.div>
-          )
-        }
+        {nearUser.map((user, index) => (
+          <motion.div
+            key={index}
+            style={{
+              position: "absolute",
+              top: Number(user.split(",")[1]),
+              left: Number(user.split(",")[0]),
+            }}
+            initial={{ scale: 0, opacity: 0, filter: "blur(10px)" }}
+            animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
+            transition={{
+              type: "spring", // 스프링 애니메이션
+              stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
+              damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
+              mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
+              delay: 0.7 + 0.1 * index, // 시작 지연
+              duration: 0.2,
+            }}
+            className={`w-16 h-16 bg-white rounded-full z-20 border-2 border-gray-600 flex items-center justify-center text-xl md:text-2xl`}
+          >
+            {user.split(",")[2]}
+          </motion.div>
+        ))}
       </div>
       <motion.div
-        className={"z-100 bottom-0 w-[100vw] bg-gradient-to-t from-white/100 to-white/0 p-5 flex flex-col items-center"}
+        className={
+          "z-100 bottom-0 w-[100vw] bg-gradient-to-t from-white/100 to-white/0 p-5 flex flex-col items-center"
+        }
         initial={{ opacity: 0, bottom: -50 }}
         animate={{ opacity: 1, bottom: 0 }}
         transition={{
@@ -394,7 +416,7 @@ const RandomPage = () => {
           stiffness: 100, // 스프링 강도 (높을수록 빠르게 복원)
           damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
           mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
-          duration: 0.3
+          duration: 0.3,
         }}
       >
         <motion.div className={"mb-5"}>
@@ -405,11 +427,9 @@ const RandomPage = () => {
             className="custom-class bg-transparent"
           >
             <div className={"text-sm md:text-xl font-semibold break-keep"}>
-              {
-                actionState === "최초" || actionState === "뽑기" || actionState === "행동버튼"
+              {actionState === "최초" || actionState === "뽑기" || actionState === "행동버튼"
                 ? `지금 당신 근처에서 ${nearUser.length}명이 미션을 하고 있어요!`
-                : "오늘의 미션을 완료했어요!"
-              }
+                : "오늘의 미션을 완료했어요!"}
             </div>
           </GradientText>
         </motion.div>
@@ -441,19 +461,19 @@ const RandomPage = () => {
             "w-full md:w-fit justify-center min-w-30 px-3 md:px-7 py-5 md:py-7 md:text-xl text-white bg-gray-700 rounded-full flex gap-1 items-center"
           }
         >
-          <span>{
-            actionState === "최초"
+          <span>
+            {actionState === "최초"
               ? "버튼 눌러서 무기력함 떨쳐내기"
               : actionState === "뽑기" || actionState === "행동버튼"
-                ? DATA.activities[Number(resultData)]!.title
-                : actionState === "완료"
-                  ? "친구에게 공유하기"
-                  : ""
-          }</span>
+              ? DATA.activities[Number(resultData)]!.title
+              : actionState === "완료"
+              ? "친구에게 공유하기"
+              : ""}
+          </span>
         </GameButton>
       </motion.div>
-    </div>)
-    : cycle === 2 ? (
+    </div>
+  ) : cycle === 2 ? (
     <div className="w-[100vw] flex flex-col items-center justify-center text-center bg-gray-950 text-white text-2xl h-screen-safe p-10">
       <motion.div className={"absolute -z-0 w-[100vw] h-screen-safe"}>
         <Aurora colorStops={["#4b4c1e", "#233a56", "#bd63ed"]} />
@@ -462,7 +482,8 @@ const RandomPage = () => {
         <motion.div
           initial={{ opacity: 0, filter: "blur(10px)" }}
           animate={{ opacity: 1, filter: "blur(0px)" }}
-          className={"flex items-center justify-center gap-2"}>
+          className={"flex items-center justify-center gap-2"}
+        >
           {/*{*/}
           {/*  [0, 1, 0, 0, 1, 1, 0].map((item, index) => <motion.div*/}
           {/*    key={index}*/}
@@ -515,7 +536,7 @@ const RandomPage = () => {
             damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
             mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
             delay: 0.2, // 시작 지연
-            duration: 0.2
+            duration: 0.2,
           }}
           className={"w-full md:w-72 mt-5"}
         >
@@ -560,7 +581,7 @@ const RandomPage = () => {
             damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
             mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
             delay: 0.3, // 시작 지연
-            duration: 0.3
+            duration: 0.3,
           }}
           className={"w-full md:w-72 mt-5"}
         >
@@ -717,8 +738,8 @@ const RandomPage = () => {
                     )}
 
                     <span className={"break-keep"}>
-                    {DATA.activities[Number(resultData)].activityButtonTitle}
-                  </span>
+                      {DATA.activities[Number(resultData)].activityButtonTitle}
+                    </span>
                   </GameButton>
                 </motion.div>
               </motion.div>
@@ -778,7 +799,6 @@ const RandomPage = () => {
             </div>
           )}
         </motion.div>
-
       </motion.div>
       <AnimatePresence>
         {isNowCancel && (
@@ -802,7 +822,7 @@ export default RandomPage;
 
 type overlay = {
   setIsNowCancel: (x: boolean) => void;
-  setCycle: (x: -2|-1|0|1|2 ) => void;
+  setCycle: (x: -2 | -1 | 0 | 1 | 2) => void;
 };
 
 const Overlay = ({ setIsNowCancel, setCycle }: overlay) => {
@@ -817,9 +837,11 @@ const Overlay = ({ setIsNowCancel, setCycle }: overlay) => {
         damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
         mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
         delay: 0, // 시작 지연
-        duration: 0.2
+        duration: 0.2,
       }}
-      className={"rounded-xl bg-white/90 backdrop-saturate-200 backdrop-contrast-200 backdrop-brightness-200 backdrop-blur-3xl w-fit px-10 py-10 mx-5"}
+      className={
+        "rounded-xl bg-white/90 backdrop-saturate-200 backdrop-contrast-200 backdrop-brightness-200 backdrop-blur-3xl w-fit px-10 py-10 mx-5"
+      }
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.7, filter: "blur(5px)" }}
@@ -830,7 +852,7 @@ const Overlay = ({ setIsNowCancel, setCycle }: overlay) => {
           damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
           mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
           delay: 0.1, // 시작 지연
-          duration: 0.2
+          duration: 0.2,
         }}
         className={"text-2xl font-bold mb-5 break-keep"}
       >
@@ -845,7 +867,7 @@ const Overlay = ({ setIsNowCancel, setCycle }: overlay) => {
           damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
           mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
           delay: 0.2, // 시작 지연
-          duration: 0.2
+          duration: 0.2,
         }}
         className={"break-keep"}
       >
@@ -861,7 +883,7 @@ const Overlay = ({ setIsNowCancel, setCycle }: overlay) => {
             damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
             mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
             delay: 0.3, // 시작 지연
-            duration: 0.2
+            duration: 0.2,
           }}
         >
           <GameButton
@@ -882,7 +904,7 @@ const Overlay = ({ setIsNowCancel, setCycle }: overlay) => {
             damping: 15, // 감쇠 계수 (낮을수록 많이 튕김)
             mass: 1, // 질량 (크면 더 느리게, 묵직하게 움직임)
             delay: 0.4, // 시작 지연
-            duration: 0.2
+            duration: 0.2,
           }}
         >
           <GameButton
